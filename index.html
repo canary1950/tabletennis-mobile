@@ -1,0 +1,3132 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>卓球フォーム総合AI分析 v3.9.32 Mobile Classic Boot</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#152033;--muted:#667085;--line:#dbe3ef;--accent:#2563eb;--accent2:#0f766e;--bad:#b42318;--good:#067647}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",sans-serif}
+header{background:linear-gradient(135deg,#0f766e,#2563eb);color:#fff;padding:18px 16px}
+header .wrap,main{max-width:1180px;margin:auto} h1{margin:0;font-size:clamp(22px,4vw,34px)} header p{margin:6px 0 0;opacity:.94}
+main{padding:14px}.card{background:var(--card);border:1px solid #edf1f7;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 4px 18px rgba(16,24,40,.06)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.two{display:grid;grid-template-columns:1.3fr .7fr;gap:14px}
+label{display:block;font-size:13px;font-weight:700;margin-bottom:6px} select,input[type=file]{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+button{border:0;border-radius:11px;padding:11px 14px;font-weight:800;cursor:pointer;background:var(--accent);color:#fff}
+button.secondary{background:var(--accent2)}button.gray{background:#667085}button:disabled{opacity:.45;cursor:not-allowed}
+.video-wrap{position:relative;background:#0b1220;border-radius:14px;overflow:hidden;aspect-ratio:16/9}
+video,canvas.overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}.overlay{pointer-events:none}
+.status{padding:10px 12px;border-radius:10px;background:#eef4ff;font-size:14px}.muted{color:var(--muted);font-size:13px}.warn{background:#fff4ed;color:#8a2c0d;padding:10px 12px;border-radius:10px}
+.progress{height:10px;background:#e8edf5;border-radius:999px;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,#0f766e,#2563eb);transition:width .15s}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px}.metric{border:1px solid var(--line);border-radius:12px;padding:12px}.metric strong{font-size:25px;display:block}.metric small{color:var(--muted)}
+.score{font-size:44px;font-weight:900;line-height:1}.badge{display:inline-block;border-radius:999px;padding:5px 9px;background:#eaf2ff;color:#1849a9;font-weight:800;font-size:12px}
+.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.shot{border:1px solid var(--line);border-radius:12px;padding:10px}.shot img{width:100%;aspect-ratio:4/3;object-fit:contain;background:#0b1220;border-radius:9px}.shot h4{margin:8px 0 4px}.shot p{margin:3px 0;font-size:13px;color:var(--muted)}
+.advice{line-height:1.65}.advice li{margin:6px 0}.hidden{display:none!important}
+.bestworst{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.bwcard{border:2px solid var(--line);border-radius:14px;padding:14px;background:#fff}
+.bwcard.best{border-color:#86d3a6;background:#f0fff5}
+.bwcard.worst{border-color:#f3b6b2;background:#fff7f6}
+.bwcard h3{margin:0 0 8px}.bigshot{font-size:34px;font-weight:900}
+.shot-score{font-size:30px;font-weight:900;color:#1849a9}
+.shot-detail{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:8px 0}
+.shot-detail div{background:#f6f8fc;border-radius:8px;padding:7px;font-size:12px}
+.shot.good{border:2px solid #98d4ad}.shot.needs{border:2px solid #efb0aa}.shot.reference{opacity:.72;border-style:dashed;background:#fafafa}.quality-badge{display:inline-block;margin-left:4px;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:800}.quality-badge.keep{background:#e8f7ee;color:#0a7a3d}.quality-badge.ref{background:#eef2f7;color:#667085}.quality-summary{margin-top:8px;padding:9px 11px;border-radius:10px;background:#f8fafc;border:1px solid var(--line);font-size:13px}
+@media(max-width:800px){.bestworst{grid-template-columns:1fr}}
+.stroke-badge{display:inline-block;padding:4px 9px;border-radius:999px;font-size:12px;font-weight:900;margin-left:6px;background:#eef4ff;color:#1849a9}
+.stroke-badge.fh{background:#fff1e8;color:#9a3412}.stroke-badge.bh{background:#ecfdf3;color:#067647}
+.compare-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin:12px 0}.compare-item{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fafcff}.delta-up{color:#067647;font-weight:900}.delta-down{color:#b42318;font-weight:900}
+.fast-note{display:inline-block;margin-top:6px;padding:5px 9px;border-radius:999px;background:#f2f4f7;color:#475467;font-size:12px;font-weight:800}
+.group-note{margin-top:8px;padding:8px 10px;border-radius:10px;background:#f8fafc;color:#475467;font-size:13px;line-height:1.55}
+.tiebadge{display:inline-block;margin-left:8px;padding:4px 8px;border-radius:999px;background:#fff;color:#344054;font-size:12px;font-weight:900;border:1px solid #d0d5dd}
+.profile-badge{display:inline-block;padding:4px 9px;border-radius:999px;font-size:12px;font-weight:900;margin-left:6px;background:#eef2ff;color:#4338ca}
+.profile-badge.fh{background:#fff7ed;color:#c2410c}.profile-badge.bh{background:#ecfdf3;color:#15803d}.profile-badge.ov{background:#eef2ff;color:#4338ca}
+.mode-note{padding:10px 12px;border-radius:10px;background:#f8fafc;border:1px solid var(--line);margin-top:10px}
+.stroke-sections{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.stroke-panel{border:1px solid var(--line);border-radius:15px;padding:14px;background:#fff}
+.stroke-panel.fh{border-top:5px solid #f59e0b}.stroke-panel.bh{border-top:5px solid #10b981}
+.stroke-title{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.stroke-title h3{margin:0}.stroke-summary{font-size:13px;color:var(--muted);margin:8px 0 12px}
+.stroke-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mini-shot{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fafcff}
+.mini-shot.best{background:#f0fff5;border-color:#86d3a6}.mini-shot.worst{background:#fff7f6;border-color:#f3b6b2}
+.mini-shot .time{font-size:24px;font-weight:900}.mini-shot .pts{font-size:28px;font-weight:900;color:#1849a9}
+.growth-box{margin-top:12px;padding:12px;border-radius:12px;background:#f8fafc;border:1px solid var(--line);line-height:1.65}
+.goal-chip{display:inline-block;padding:5px 9px;margin:3px;border-radius:999px;background:#eef4ff;color:#1849a9;font-size:12px;font-weight:900}
+.stroke-metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.stroke-metrics div{background:#f8fafc;border-radius:8px;padding:7px;font-size:12px;text-align:center}
+.stroke-metrics strong{display:block;font-size:17px}
+@media(max-width:900px){.stroke-sections{grid-template-columns:1fr}.stroke-pair{grid-template-columns:1fr}.stroke-metrics{grid-template-columns:repeat(2,1fr)}}
+.history-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.history-controls button{width:auto}
+.compare-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:12px 0}
+.compare-card{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fafcff}
+.compare-card strong{display:block;font-size:26px;margin-top:5px}
+.change-up{color:#067647}.change-down{color:#b42318}.change-flat{color:#667085}
+.history-table{width:100%;border-collapse:collapse;font-size:13px}
+.history-table th,.history-table td{padding:9px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.history-wrap{overflow:auto}.history-item-actions{display:flex;gap:6px}
+.history-item-actions button{padding:6px 9px;font-size:12px}
+.carte-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}.carte-toolbar button{width:auto}
+.carte-head{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}.carte-kpi{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fbfdff}.carte-kpi strong{display:block;font-size:22px}.carte-kpi small{color:var(--muted)}
+.carte-section{border:1px solid var(--line);border-radius:12px;padding:12px;margin:12px 0;background:#fff}.carte-section h3{margin-top:0}.carte-shot-table{width:100%;border-collapse:collapse;font-size:12px}.carte-shot-table th,.carte-shot-table td{padding:7px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.carte-shot-wrap{overflow:auto}.carte-muted{color:var(--muted);font-size:12px}.carte-compare-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.carte-delta{font-weight:800}.carte-delta.up{color:#087443}.carte-delta.down{color:#c43220}.carte-delta.flat{color:#667085}
+@media(max-width:900px){.carte-head,.carte-compare-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.chart-wrap{position:relative;width:100%;height:320px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:8px;margin-top:12px}
+.chart-wrap canvas{width:100%;height:100%;display:block}
+.player-bar{display:grid;grid-template-columns:minmax(220px,1fr) auto auto;gap:10px;align-items:end;margin-bottom:14px;padding:12px;border:1px solid var(--line);border-radius:13px;background:#f8fafc}
+.player-chip{display:inline-block;padding:5px 9px;border-radius:999px;background:#eef4ff;color:#1849a9;font-size:12px;font-weight:900}
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.42);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999}
+.modal{width:min(520px,100%);background:#fff;border-radius:16px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.24)}
+.modal h3{margin-top:0}.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+@media(max-width:720px){.player-bar{grid-template-columns:1fr}.profile-grid{grid-template-columns:1fr}}
+
+
+
+
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left}
+@media(max-width:800px){.two{grid-template-columns:1fr}.video-wrap{aspect-ratio:3/4}button{width:100%}}
+.mobile-note{display:none}.share-status{margin-top:8px;min-height:1.4em}.compact-toggle{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#f8fafc}.compact-toggle input{width:20px;height:20px;flex:0 0 auto}.compact-toggle label{margin:0;font-size:14px}.share-actions{display:flex;gap:8px;flex-wrap:wrap}.share-actions button{width:auto}
+@media(max-width:800px){body{font-size:15px}main{padding:8px}.card{padding:12px;margin-bottom:10px;border-radius:13px}header{padding:13px 11px}.video-wrap{aspect-ratio:4/3}.mobile-note{display:block}.share-actions{display:grid;grid-template-columns:1fr 1fr}.share-actions button{width:100%;min-height:48px}.history-controls button,.carte-toolbar button{min-height:46px}.history-table{font-size:12px}.chart-wrap{height:260px}}
+
+/* v3.7 evaluation engine */
+.engine-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0}
+.engine-metric{border:1px solid var(--line);border-radius:13px;padding:12px;background:#fff}
+.engine-metric strong{display:block;font-size:32px;line-height:1.1}
+.engine-metric small{color:var(--muted)}
+.engine-metric .why{font-size:12px;color:#667085;margin-top:6px;line-height:1.45}
+.evidence-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fafcff;margin-top:12px}
+.evidence-card h3{margin:0 0 8px}
+.evidence-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.evidence-item{background:white;border:1px solid var(--line);border-radius:10px;padding:10px;line-height:1.55}
+.profile-condition{margin-top:10px;padding:10px;border-radius:10px;background:#fff7ed;border:1px solid #fed7aa}
+.score-band{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:900;background:#eef4ff;color:#1849a9}
+.reference-note{margin-top:10px;padding:10px;border-left:4px solid #2563eb;background:#eff6ff;border-radius:8px}
+.personal-delta{font-weight:900}
+.personal-delta.up{color:#067647}.personal-delta.down{color:#b42318}
+@media(max-width:900px){.engine-grid{grid-template-columns:repeat(2,1fr)}.evidence-grid{grid-template-columns:1fr}}
+
+
+/* v3.8: separate current-video form score and accumulated competitive level */
+.dual-score-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.level-card{border:1px solid var(--line);border-radius:16px;padding:18px;background:#fff}
+.level-card h2{margin:0 0 8px}
+.level-score{font-size:46px;font-weight:950;line-height:1}
+.level-label{font-weight:900;margin-top:6px}
+.level-meta{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.55}
+.level-progress{height:10px;background:#eef2f6;border-radius:999px;overflow:hidden;margin-top:10px}
+.level-progress>div{height:100%;background:currentColor}
+.shot-new-note{font-size:12px;color:#475467;margin-top:8px}
+@media(max-width:760px){.dual-score-grid{grid-template-columns:1fr}}
+
+
+/* v3.9 motion dynamics */
+.dyn-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+.dyn-box{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}
+.dyn-box strong{display:block;font-size:28px}
+.dyn-box small{color:var(--muted)}
+.wave-card{border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:12px;background:#fbfdff}
+.wave-card canvas{width:100%;height:180px;display:block;background:#fff;border-radius:10px}
+.dyn-note{font-size:12px;color:#667085;line-height:1.55;margin-top:8px}
+@media(max-width:900px){.dyn-grid{grid-template-columns:repeat(2,1fr)}}
+
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>🏓 卓球フォーム総合AI分析 v3.9.32 Mobile Classic Boot</h1>
+<p>MediaPipe Poseで骨格33点を検出し、関節角度・体幹・手首速度・リカバリーを数値化します。</p>
+</div></header>
+
+<main><div class="result-box" style="margin-bottom:12px"><strong>スマホ起動修正版 v3.9.32</strong>：基本画面を通常JavaScriptで起動し、iPhoneで名前登録などが停止する問題を回避しました。AI部品は「AIを準備」を押した時にだけ読み込みます。<span id="appBootState" class="fast-note">起動確認中…</span></div>
+<section class="card">
+  <div class="player-bar">
+    <div>
+      <label for="playerSelect">分析する選手</label>
+      <select id="playerSelect"></select>
+      <div class="muted" style="margin-top:5px">履歴・前回との差・推移グラフは選手ごとに分けて保存します。選手を切り替えると前の動画と分析結果は自動で消去されます。v3.6.2では脚が一部隠れていても、上半身の主要骨格が取れれば解析を続行します。</div>
+    </div>
+    <button id="addPlayerBtn" class="secondary">＋ 新しい選手</button>
+    <button id="editPlayerBtn" class="gray">選手を編集</button>
+  </div>
+  <div class="grid">
+    <div><label>分析する動画</label><input id="file" type="file" accept="video/*"><div id="videoOwnerLabel" class="muted" style="margin-top:5px">動画未選択</div></div>
+    <div><label>利き手</label><select id="hand"><option value="right">右利き</option><option value="left">左利き</option></select></div>
+    <div><label>分析モード</label><select id="mode">
+      <option value="overall">総合</option><option value="backhand">バックハンド</option><option value="forehand">フォアハンド</option>
+      <option value="drive">ドライブ</option><option value="cut">カット</option><option value="chiquita">チキータ</option>
+      <option value="stop">ストップ</option><option value="serve">サービス</option><option value="receive">レシーブ</option>
+    </select></div>
+    <div><label>解析精度</label><select id="quality"><option value="0.16">標準（おすすめ）</option><option value="0.10">高精度</option><option value="0.24">高速</option></select></div>
+    <div class="compact-toggle"><input id="mobileLightMode" type="checkbox"><label for="mobileLightMode">スマホ軽量モード（候補画像を縮小し、処理の合間に端末を休ませます）</label></div>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+    <button id="initBtn" class="secondary">① AIを準備</button>
+    <button id="analyzeBtn" disabled>② 動画をAI分析</button>
+    <button id="liveBtn" class="gray" disabled>骨格表示 ON</button>
+        <button id="saveHistoryBtn" class="secondary" disabled>③ 分析カルテを保存</button>
+    <button id="shareCurrentBtn" class="gray" disabled>④ 結果を共有</button>
+  </div>
+  <div id="status" class="status" style="margin-top:12px">動画を選び、「AIを準備」を押してください。</div>
+  <div class="progress" style="margin-top:10px"><div id="bar" class="bar"></div></div>
+</section>
+
+<section class="card two">
+  <div>
+    <div class="video-wrap">
+      <video id="video" controls playsinline></video>
+      <canvas id="overlay" class="overlay"></canvas>
+    </div>
+  </div>
+  <div>
+    <span class="badge">AI POSE</span>
+    <h2 style="margin-bottom:8px">今回の動画フォーム評価</h2>
+    <div id="totalScore" class="score">--</div>
+    <div id="grade" class="muted">未分析</div>
+    <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+    <div id="summary" class="muted">解析後にフォームの特徴を表示します。</div>
+  </div>
+</section>
+
+<section id="careerLevelCard" class="card">
+  <h2>蓄積型競技レベル</h2>
+  <p class="muted">今回の動画とは別に、v3.8系で保存した複数回の分析から競技レベルを推定します。1〜2回は暫定です。</p>
+  <div class="dual-score-grid">
+    <div class="level-card">
+      <div id="careerLevelScore" class="level-score">--</div>
+      <div id="careerLevelLabel" class="level-label">新方式の履歴が必要です</div>
+      <div class="level-progress"><div id="careerLevelBar" style="width:0%"></div></div>
+    </div>
+    <div class="level-card">
+      <div id="careerLevelMeta" class="level-meta">新方式の分析を保存すると、通常水準・上限水準・安定性から蓄積評価します。</div>
+    </div>
+  </div>
+</section>
+
+<section id="metricsCard" class="card hidden">
+<h2>身体動作の数値</h2>
+<div id="metrics" class="metrics"></div>
+<p class="muted">角度は映像から推定した身体ランドマークに基づく近似値です。カメラ方向によって見かけの角度は変わります。</p>
+</section>
+
+
+
+
+<section id="dynamicsCard" class="card hidden">
+  <h2>v3.9.29 PC History Guard 実測動作能力分析</h2>
+  <p class="muted">候補球の前後を高密度解析し、固定した身体基準による速度波形・加速立ち上がり・運動連鎖の立ち上がり時系列・打球後減速・次球準備を測ります。未検出項目は減点せず評価対象外にします。 v3.9.29 PC History Guardでは候補波形の品質を先に選別し、採用された通常球の中央値・下位球安定性に加えて「運動連鎖伝達効率」と「選手差判別指数」を中核指標にします。選手差判別指数は固定肩幅基準の実測手首速度を最も重くし、連鎖伝達・運動連鎖・加速立ち上がりを組み合わせ、上級者と中級者の差を過度に圧縮しない設計です。下半身・体幹側の動きが腕・手首の実測出力へどれだけ無駄なく伝わったかを、立ち上がり順序・各部位の速度増幅・実測手首速度・加速立ち上がりから評価します。姿勢点は補助指標として扱います。</p>
+  <div id="dynamicsScores" class="dyn-grid"></div>
+  <div class="wave-card">
+    <h3>代表球の速度波形</h3>
+    <canvas id="waveCanvas" width="1000" height="220"></canvas>
+    <div id="waveInfo" class="dyn-note"></div><div id="scaleInfo" class="dyn-note"></div>
+  </div>
+</section>
+
+<section id="engineCard" class="card hidden">
+  <h2>v3.9.29 PC History Guard 実測動作評価エンジン</h2>
+  <p class="muted">v3.8では「今回の動画フォーム評価」と「蓄積型競技レベル」を分離します。1球ごとの点数も新方式へ統一し、1本の動画だけで競技力を断定しません。</p>
+  <div id="engineScores" class="engine-grid"></div>
+  <div id="engineAdvice" class="evidence-card"></div>
+</section>
+
+<section id="bestWorstCard" class="card hidden">
+<h2>1球ごとの比較・フォア／バック推定・同点整理</h2>
+<div id="bestWorst" class="bestworst"></div>
+<div id="shotCoach" class="advice"></div>
+</section>
+
+
+<section id="strokeGrowthCard" class="card hidden">
+<h2>フォア・バック別ベスト／ワースト・状態アドバイス</h2>
+<p class="muted">フォアとバックを別々に比較し、それぞれの最良球・改善球・平均点・次回の重点練習を表示します。</p>
+<div id="strokeGrowth" class="stroke-sections"></div>
+</section>
+
+<section id="shotsCard" class="card hidden">
+<h2>1球ごとのAI採点</h2>
+<p class="muted">v3.9.29 PC History Guardでは各候補をまず「波形の明瞭さ・ピーク位置・打球後の落ち込み・判定情報」で品質選別し、その後に「固定肩幅基準の安定速度・加速立ち上がり・運動連鎖の球間再現性・打球後減速・次球準備」で評価します。旧方式の1球得点は表示しません。フォア／バック別の平均・最良球・改善球も、この新しい1球得点から計算します。ボール接触そのものを検出しているわけではありません。</p>
+<div id="shots" class="shots"></div>
+</section>
+
+<section id="adviceCard" class="card hidden">
+<h2>AIフォーム評価・改善アドバイス</h2>
+<div id="advice" class="advice"></div>
+</section>
+
+
+<section id="historyCard" class="card">
+<h2>選手別 練習履歴・前回との差・推移グラフ</h2><p>表示中：<span id="historyPlayerName" class="player-chip">未分類ユーザー</span></p>
+<p class="muted">分析結果の点数・課題・代表球の時刻を、このブラウザ内に保存します。動画そのものは保存しません。</p>
+<div id="previousCompare" class="result-box">まだ比較できる履歴がありません。</div>
+<div class="chart-wrap"><canvas id="growthChart"></canvas></div>
+<div id="performanceStateSummary" class="result-box" style="margin-top:10px">履歴が増えると、安定・変動・最近の傾向を表示します。</div>
+<p class="muted">総合点・フォア平均・バック平均の推移を表示します。上下を「変化／低下」と決めつけず、状態の変化として見ます。</p>
+<div class="history-controls">
+  <button id="exportHistoryBtn" class="gray">履歴JSONを書き出す</button>
+  <button id="exportCsvBtn" class="gray">履歴CSVを書き出す</button>
+  <button id="releaseMemoryBtn" class="gray">解析メモリを解放</button>
+  <button id="reloadHistoryBtn" class="gray">履歴表示を再読込</button>
+  <button id="clearPlayerHistoryBtn" class="warn">この選手の履歴を全削除</button>
+  <button id="clearAllHistoryBtn" class="warn">全選手の履歴を全削除</button>
+</div>
+<p class="muted">各記録を1件だけ消す場合は、下の一覧の「この1件を削除」を使います。全削除は確認後に実行されます。</p>
+<p class="muted">「解析メモリを解放」は候補画像などの一時データだけを解放します。保存済みカルテや履歴は残ります。</p>
+<div class="history-wrap">
+<table class="history-table">
+<thead><tr><th>日付</th><th>動画</th><th>動画評価</th><th>蓄積競技レベル</th><th>フォア</th><th>バック</th><th>重点課題</th><th>操作</th></tr></thead>
+<tbody id="historyRows"></tbody>
+</table>
+</div>
+</section>
+
+<section id="savedCarteCard" class="card hidden">
+  <h2>保存した分析カルテ</h2>
+  <div class="carte-toolbar">
+    <button id="printCarteBtn">印刷・PDF保存</button>
+    <button id="exportCarteBtn" class="gray">このカルテをJSON出力</button>
+    <button id="shareCarteBtn" class="secondary">テキストで共有</button>
+    <button id="copyCarteBtn" class="gray">結果をコピー</button>
+    <button id="closeCarteBtn" class="warn">閉じる</button>
+  </div>
+  <div id="shareStatus" class="muted share-status" aria-live="polite"></div>
+  <div id="savedCarteView"></div>
+</section>
+
+<section id="dataCard" class="card hidden">
+<h2>フレーム解析データ</h2>
+<div style="overflow:auto"><table><thead><tr><th>時刻</th><th>肘角</th><th>左膝</th><th>右膝</th><th>体幹傾斜</th><th>手首速度</th></tr></thead><tbody id="rows"></tbody></table></div>
+</section>
+
+<section class="card warn">
+<strong>このv3.9.29 PC History Guardで分かること / 分からないこと</strong><br>
+身体の姿勢・関節角度・実測動作・連鎖伝達・通常球能力を数値化し、1回ごとの分析カルテと複数回の推移を記録できます。履歴の上下は「成長／低下」と決めつけず、安定・変動・最近高め・最近低めなどの状態として表示します。一方、ラケット面角度、ボール回転量、正確なインパクト瞬間はPoseだけでは直接測れません。
+</section>
+<div id="playerModal" class="modal-backdrop hidden">
+  <div class="modal">
+    <h3 id="playerModalTitle">新しい選手</h3>
+    <div class="profile-grid">
+      <div><label for="playerNameInput">選手名</label><input id="playerNameInput" type="text" placeholder="例：坂井さん"></div>
+      <div><label for="playerHandInput">利き手</label><select id="playerHandInput"><option value="right">右利き</option><option value="left">左利き</option></select></div>
+      <div>
+        <label for="playerConditionInput">身体条件・配慮</label>
+        <select id="playerConditionInput">
+          <option value="standard">通常評価</option>
+          <option value="mobility_limited">移動制限を考慮</option>
+          <option value="back_pain">腰への負担を考慮</option>
+          <option value="mobility_back">移動制限＋腰への負担を考慮</option>
+        </select>
+      </div>
+
+    </div>
+    <div class="modal-actions">
+      <button id="cancelPlayerBtn" class="gray">キャンセル</button>
+      <button id="savePlayerBtn">保存</button>
+    </div>
+  </div>
+</div>
+</main>
+
+<script>
+let PoseLandmarker=null, FilesetResolver=null, DrawingUtils=null;
+async function loadVisionLibrary(){
+  if(PoseLandmarker&&FilesetResolver)return;
+  const visionModule=await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.mjs");
+  PoseLandmarker=visionModule.PoseLandmarker;
+  FilesetResolver=visionModule.FilesetResolver;
+  DrawingUtils=visionModule.DrawingUtils;
+}
+
+const $ = id => document.getElementById(id);
+const file=$("file"), video=$("video"), overlay=$("overlay"), ctx=overlay.getContext("2d");
+const initBtn=$("initBtn"), analyzeBtn=$("analyzeBtn"), liveBtn=$("liveBtn"), status=$("status"), bar=$("bar");
+const saveHistoryBtn=$("saveHistoryBtn"), shareCurrentBtn=$("shareCurrentBtn"), exportHistoryBtn=$("exportHistoryBtn"), exportCsvBtn=$("exportCsvBtn"), releaseMemoryBtn=$("releaseMemoryBtn"), reloadHistoryBtn=$("reloadHistoryBtn"), clearPlayerHistoryBtn=$("clearPlayerHistoryBtn"), clearAllHistoryBtn=$("clearAllHistoryBtn");
+const printCarteBtn=$("printCarteBtn"), exportCarteBtn=$("exportCarteBtn"), shareCarteBtn=$("shareCarteBtn"), copyCarteBtn=$("copyCarteBtn"), shareStatus=$("shareStatus"), closeCarteBtn=$("closeCarteBtn"), savedCarteCard=$("savedCarteCard"), savedCarteView=$("savedCarteView");
+const mobileLightMode=$("mobileLightMode");
+const playerSelect=$("playerSelect"), addPlayerBtn=$("addPlayerBtn"), editPlayerBtn=$("editPlayerBtn");
+const playerModal=$("playerModal"), playerModalTitle=$("playerModalTitle"), playerNameInput=$("playerNameInput"), playerHandInput=$("playerHandInput");
+const cancelPlayerBtn=$("cancelPlayerBtn"), savePlayerBtn=$("savePlayerBtn"), playerConditionInput=$("playerConditionInput");
+const HISTORY_KEY="tt_ai_analysis_history_v36";
+const CARTE_SCHEMA="v3.9.32 Mobile Classic Boot";
+const OLD_HISTORY_KEY="tt_ai_analysis_history_v35";
+const PLAYERS_KEY="tt_ai_players_v36";
+const ACTIVE_PLAYER_KEY="tt_ai_active_player_v36";
+const UNCLASSIFIED_PLAYER_ID="unclassified";
+let lastAnalysisSummary=null;
+let openedCarte=null;
+let editingPlayerId=null;
+let pose=null, videoURL=null, live=false, raf=null, analysisData=[], shotAnalysisData=[], shots=[];
+let analysisRunId=0;
+
+// v3.9.29 PC History Guard performance cache:
+// the same candidate's dense dynamics were being recalculated many times
+// (shot score / efficiency / engine / output / quality). Cache by candidate time.
+let dynamicsCache=new Map();
+let stableBodyScaleCache=NaN;
+let mpTimestamp = 0;
+const isMobileDevice=()=>window.matchMedia("(max-width: 800px)").matches || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+mobileLightMode.checked=isMobileDevice();
+if(isMobileDevice()) $("quality").value="0.24";
+
+// MediaPipe VIDEO mode requires timestamps to be strictly monotonically increasing.
+// Never use video.currentTime / Date.now() / performance.now() interchangeably.
+function nextMpTimestamp(step=33){
+  mpTimestamp += Math.max(1, step);
+  return mpTimestamp;
+}
+
+const MODEL="https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/latest/pose_landmarker_full.task";
+const WASM="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm";
+
+
+
+function releaseTransientAnalysisMemory(){
+  // Remove decoded candidate images from the DOM before dropping JS references.
+  try{
+    document.querySelectorAll("#shots img, #bestWorst img, #shotCoach img").forEach(img=>{
+      try{img.src=""}catch(e){}
+      try{img.removeAttribute("src")}catch(e){}
+    });
+  }catch(e){}
+
+  try{$("shots").innerHTML=""}catch(e){}
+  try{$("bestWorst").innerHTML=""}catch(e){}
+  try{$("shotCoach").innerHTML=""}catch(e){}
+
+  shots=[];
+  analysisData=[];
+  shotAnalysisData=[];
+  dynamicsCache=new Map();
+  stableBodyScaleCache=NaN;
+
+  window.__lastShotScores=[];
+  window.__lastCandidateSelection=null;
+  window.__lastDynamics=null;
+  window.__legacyEvaluation=null;
+  window.__lastEngine=null;
+
+  // Clear large canvases used only for the previous run.
+  try{
+    const wc=$("waveCanvas");
+    if(wc){
+      const wctx=wc.getContext("2d");
+      wctx.clearRect(0,0,wc.width,wc.height);
+    }
+  }catch(e){}
+
+  // Yielding gives the browser an opportunity to reclaim detached image/canvas memory.
+  return new Promise(resolve=>setTimeout(resolve,40));
+}
+
+function resetAnalysisSession({clearVideo=true,clearFile=true,statusMessage=""}={}){
+  // Invalidate any currently running asynchronous analysis.
+  analysisRunId++;
+
+  live=false;
+  if(raf){cancelAnimationFrame(raf);raf=null}
+  try{video.pause()}catch(e){}
+
+  if(clearVideo){
+    if(videoURL){URL.revokeObjectURL(videoURL);videoURL=null}
+    video.removeAttribute("src");
+    try{video.load()}catch(e){}
+  }
+  if(clearFile) file.value="";
+
+  overlay.width=overlay.width||1;
+  overlay.height=overlay.height||1;
+  ctx.clearRect(0,0,overlay.width,overlay.height);
+
+  analysisData=[];
+  shotAnalysisData=[];
+  dynamicsCache=new Map(); stableBodyScaleCache=NaN;
+  shots=[];
+  window.__lastShotScores=[];
+  window.__lastEngine=null;
+  window.__legacyEvaluation=null;
+  window.__lastCareerLevel=null;
+  if($("careerLevelScore"))$("careerLevelScore").textContent="--";
+  if($("careerLevelLabel"))$("careerLevelLabel").textContent="新方式の履歴が必要です";
+  if($("careerLevelMeta"))$("careerLevelMeta").textContent="1本の動画だけで競技力を断定せず、複数回の新方式分析から推定します。";
+  lastAnalysisSummary=null;
+  shareCurrentBtn.disabled=true;
+  openedCarte=null; if(savedCarteCard){savedCarteCard.classList.add("hidden");savedCarteView.innerHTML=""}
+
+  $("totalScore").textContent="--";
+  $("grade").textContent="未分析";
+  $("summary").textContent="解析後にフォームの特徴を表示します。";
+
+  $("metrics").innerHTML="";
+  $("shots").innerHTML="";
+  $("advice").innerHTML="";
+  $("rows").innerHTML="";
+  $("bestWorst").innerHTML="";
+  $("shotCoach").innerHTML="";
+  $("strokeGrowth").innerHTML="";
+
+  $("metricsCard").classList.add("hidden");
+  $("shotsCard").classList.add("hidden");
+  $("adviceCard").classList.add("hidden");
+  $("dataCard").classList.add("hidden");
+  $("bestWorstCard").classList.add("hidden");
+  $("strokeGrowthCard").classList.add("hidden");
+  $("engineCard").classList.add("hidden");
+  if($("dynamicsCard"))$("dynamicsCard").classList.add("hidden");
+  window.__lastDynamics=null;
+  $("engineScores").innerHTML="";
+  $("engineAdvice").innerHTML="";
+
+  bar.style.width="0%";
+  liveBtn.textContent="骨格表示 ON";
+  liveBtn.disabled=true;
+  analyzeBtn.disabled=true;
+  saveHistoryBtn.disabled=true;
+
+  $("videoOwnerLabel").textContent="動画未選択";
+  if(statusMessage) status.textContent=statusMessage;
+}
+
+file.addEventListener("change",async()=>{
+  const f=file.files[0];
+  if(!f)return;
+
+  await releaseTransientAnalysisMemory();
+
+  // Clear the previous person's/video's analysis, but keep the newly chosen file input.
+  resetAnalysisSession({clearVideo:true,clearFile:false});
+  videoURL=URL.createObjectURL(f);
+  video.src=videoURL;
+
+  const p=activePlayer();
+  $("videoOwnerLabel").textContent=`現在の動画：${p.name} ／ ${f.name}`;
+  status.textContent=`${p.name} の動画を読み込んでいます…`;
+
+  video.onloadedmetadata=()=>{
+    analyzeBtn.disabled=!pose;
+    liveBtn.disabled=!pose;
+    status.textContent=`${p.name} の動画読込完了：${video.duration.toFixed(1)}秒`;
+  };
+});
+
+
+
+function makeId(){return "p_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7)}
+function loadPlayers(){
+  try{const p=JSON.parse(localStorage.getItem(PLAYERS_KEY)||"[]");if(Array.isArray(p)&&p.length)return p}catch(e){}
+  const base=[{id:UNCLASSIFIED_PLAYER_ID,name:"未分類ユーザー",hand:"right",system:true}];
+  localStorage.setItem(PLAYERS_KEY,JSON.stringify(base));return base;
+}
+function savePlayers(p){localStorage.setItem(PLAYERS_KEY,JSON.stringify(p))}
+function activePlayerId(){const ps=loadPlayers(),s=localStorage.getItem(ACTIVE_PLAYER_KEY);return ps.some(p=>p.id===s)?s:ps[0].id}
+function activePlayer(){return loadPlayers().find(p=>p.id===activePlayerId())||loadPlayers()[0]}
+function renderPlayerSelect(){
+  const ps=loadPlayers(),id=activePlayerId();
+  playerSelect.innerHTML=ps.map(p=>`<option value="${p.id}">${p.name}${p.system?"":"（"+(p.hand==="left"?"左":"右")+"）"}</option>`).join("");
+  playerSelect.value=id;
+  const p=activePlayer();$("hand").value=p.hand||"right";$("historyPlayerName").textContent=p.name;editPlayerBtn.disabled=!!p.system;
+}
+function setActivePlayer(id,{clearSession=true}={}){
+  const before=activePlayerId();
+  localStorage.setItem(ACTIVE_PLAYER_KEY,id);
+  renderPlayerSelect();
+
+  if(clearSession && before!==id){
+    resetAnalysisSession({
+      clearVideo:true,
+      clearFile:true,
+      statusMessage:`${activePlayer().name} を選択しました。新しい動画を選んでください。`
+    });
+  }else{
+    lastAnalysisSummary=null;
+    saveHistoryBtn.disabled=true;
+  }
+  renderHistoryUI();
+}
+function migrateOldHistory(){
+  if(localStorage.getItem(HISTORY_KEY))return;
+  let old=[];try{old=JSON.parse(localStorage.getItem(OLD_HISTORY_KEY)||"[]")}catch(e){}
+  old=(Array.isArray(old)?old:[]).map(x=>({...x,playerId:UNCLASSIFIED_PLAYER_ID,playerName:"未分類ユーザー"}));
+  localStorage.setItem(HISTORY_KEY,JSON.stringify(old));
+}
+function loadHistory(){try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]")}catch(e){return []}}
+function compactHistoryEntry(x){
+  const y={...x};delete y.snapshots;delete y.waveImage;delete y.shots;delete y.frameData;return y;
+}
+function saveHistoryStore(items){
+  const all=items.slice(-200);
+  // Keep complete analysis cartes for the most recent 30 records. Older records remain
+  // available as lightweight score/history summaries so localStorage does not overflow.
+  const keepFrom=Math.max(0,all.length-30);
+  const payload=all.map((x,i)=>i<keepFrom?compactHistoryEntry(x):x);
+  try{localStorage.setItem(HISTORY_KEY,JSON.stringify(payload))}
+  catch(e){
+    // If the browser quota is small, preserve all summaries and only the newest 12 full cartes.
+    const k=Math.max(0,all.length-12);
+    const fallback=all.map((x,i)=>i<k?compactHistoryEntry(x):x);
+    localStorage.setItem(HISTORY_KEY,JSON.stringify(fallback));
+  }
+}
+function historyForPlayer(id=activePlayerId()){return loadHistory().filter(x=>(x.playerId||UNCLASSIFIED_PLAYER_ID)===id)}
+function compactDate(iso){const d=new Date(iso);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`}
+function historyWeakest(entry){
+  const arr=[["構え",entry.ready],["下半身",entry.lower],["腕",entry.arm],["体幹",entry.torso],["リズム",entry.rhythm],["戻り",entry.recovery]].filter(x=>Number.isFinite(x[1])).sort((a,b)=>a[1]-b[1]);
+  return arr.length?arr[0][0]:"—";
+}
+function buildHistoryEntry(e,shotScores){
+  const fh=shotScores.filter(s=>s.strokeKey==="forehand"),bh=shotScores.filter(s=>s.strokeKey==="backhand");
+  const avg=a=>a.length?Math.round(mean(a.map(x=>x.total))):null,p=activePlayer();
+  const out={id:Date.now(),savedAt:new Date().toISOString(),playerId:p.id,playerName:p.name,overall:(window.__lastEngine?.overall??e.total),legacyOverall:e.total,forehandAvg:avg(fh),backhandAvg:avg(bh),ready:e.ready,lower:e.lower,arm:e.arm,torso:e.torso,rhythm:e.rhythm,recovery:e.recovery,forehandCount:fh.length,backhandCount:bh.length};
+  if(window.__lastEngine){
+    out.engineOverall=window.__lastEngine.overall;
+    out.techScore=window.__lastEngine.techScore;
+    out.reproScore=window.__lastEngine.reproScore;
+    out.efficiencyScore=window.__lastEngine.efficiencyScore;
+    out.transferScore=window.__lastEngine.transferScore;
+    out.separationScore=window.__lastEngine.separationScore;
+    out.ordinaryAbility=window.__lastEngine.ordinaryAbility;
+    out.ordinaryMedian=window.__lastEngine.ordinaryMedian;
+    out.lowerStability=window.__lastEngine.lowerStability;
+    out.timingScore=window.__lastEngine.timingScore;
+    out.personalScore=window.__lastEngine.personalScore;
+    if(window.__lastEngine.dynamics){
+      out.dynamicsTotal=window.__lastEngine.dynamics.dynamicsTotal;
+      out.normalizedSpeed=window.__lastEngine.dynamics.speedScore;
+      out.riseScore=window.__lastEngine.dynamics.riseScore;
+      out.chainScore=window.__lastEngine.dynamics.chainScore;
+      out.dynamicRecovery=window.__lastEngine.dynamics.decelScore;
+      out.readyScore=window.__lastEngine.dynamics.readyScore;
+      out.chainConsistency=window.__lastEngine.dynamics.chainConsistency;
+      out.fixedBodyScale=window.__lastEngine.dynamics.fixedScale;
+    }
+    const cl=window.__lastCareerLevel;
+    if(cl){
+      out.careerLevel=cl.level;
+      out.careerLevelCount=cl.count;
+      out.careerLevelProvisional=cl.provisional;
+    }
+  }
+  out.focus=historyWeakest(out);return out;
+}
+
+function safeNum(v){return Number.isFinite(Number(v))?Number(v):null}
+function sanitizeShotForCarte(s,i){
+  return {
+    no:i+1,t:safeNum(s.t),total:safeNum(s.total),strokeKey:s.strokeKey||"",strokeType:s.strokeType||"",strokeConfidence:safeNum(s.strokeConfidence),
+    candidateQuality:safeNum(s.candidateQuality),speedScore:safeNum(s.speedScore),elbowScore:safeNum(s.elbowScore),kneeScore:safeNum(s.kneeScore),torsoScore:safeNum(s.torsoScore),recoveryScore:safeNum(s.recoveryScore),
+    timingScore:safeNum(s.timingScore),efficiencyShotScore:safeNum(s.efficiencyShotScore),transferScore:safeNum(s.transferScore),dynamicsTotal:safeNum(s.dynamicsTotal),
+    speedDynScore:safeNum(s.speedDynScore),riseDynScore:safeNum(s.riseDynScore),chainDynScore:safeNum(s.chainDynScore),decelDynScore:safeNum(s.decelDynScore),readyDynScore:safeNum(s.readyDynScore),
+    decelTime:safeNum(s.decelTime),readyTime:safeNum(s.readyTime),peakNormSpeed:safeNum(s.peakNormSpeed),elbow:safeNum(s.elbow),elbowROM:safeNum(s.elbowROM),kneeROM:safeNum(s.kneeROM),torsoSD:safeNum(s.torsoSD),
+    measurementValid:s.measurementValid!==false
+  };
+}
+function sectionSnapshot(id){const el=$(id);return el?el.innerHTML:""}
+function makeCartePayload(base){
+  const p=activePlayer();
+  const f=file.files?.[0];
+  const frameRows=(analysisData||[]).filter((_,i)=>i%Math.max(1,Math.round(1/(parseFloat($("quality").value)*3)))===0).slice(0,120).map(d=>({
+    t:safeNum(d.t),elbow:safeNum(d.elbow),leftKnee:safeNum(d.leftKnee),rightKnee:safeNum(d.rightKnee),torso:safeNum(d.torso),wristSpeed:safeNum(d.wristSpeed)
+  }));
+  let waveImage="";try{waveImage=$("waveCanvas")?.toDataURL("image/png")||""}catch(e){}
+  const eng=window.__lastEngine||{};
+  return {...base,
+    schema:CARTE_SCHEMA,playerId:p.id,playerName:p.name,videoName:f?.name||base.videoName||"動画名未記録",mode:$("mode").value,modeLabel:$("mode").selectedOptions?.[0]?.textContent||$("mode").value,
+    hand:$("hand").value,handLabel:$("hand").selectedOptions?.[0]?.textContent||$("hand").value,qualityLabel:$("quality").selectedOptions?.[0]?.textContent||"",
+    gradeText:$("grade").textContent,summaryText:$("summary").textContent,careerScore:$("careerLevelScore")?.textContent||"—",careerLabel:$("careerLevelLabel")?.textContent||"",careerMeta:$("careerLevelMeta")?.textContent||"",
+    engine:{overall:safeNum(eng.overall),techScore:safeNum(eng.techScore),reproScore:safeNum(eng.reproScore),efficiencyScore:safeNum(eng.efficiencyScore),ordinaryAbility:safeNum(eng.ordinaryAbility),ordinaryMedian:safeNum(eng.ordinaryMedian),lowerStability:safeNum(eng.lowerStability),timingScore:safeNum(eng.timingScore),personalScore:safeNum(eng.personalScore),separationScore:safeNum(eng.separationScore),transferScore:safeNum(eng.transferScore)},
+    snapshots:{metrics:sectionSnapshot("metrics"),dynamicsScores:sectionSnapshot("dynamicsScores"),engineScores:sectionSnapshot("engineScores"),engineAdvice:sectionSnapshot("engineAdvice"),bestWorst:sectionSnapshot("bestWorst"),shotCoach:sectionSnapshot("shotCoach"),strokeGrowth:sectionSnapshot("strokeGrowth"),advice:sectionSnapshot("advice"),waveInfo:$("waveInfo")?.innerHTML||"",scaleInfo:$("scaleInfo")?.innerHTML||""},
+    waveImage,shots:(window.__lastShotScores||[]).map(sanitizeShotForCarte),frameData:frameRows
+  };
+}
+function escCsv(v){const s=String(v??"");return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}
+async function exportFileSafe(text,type,name){
+  const blob=new Blob([text],{type});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=name;
+  a.rel="noopener";
+  a.style.display="none";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{
+    try{URL.revokeObjectURL(url)}catch(e){}
+    try{a.remove()}catch(e){}
+  },30000);
+}
+function safeFileName(s){
+  return String(s||"player").replace(/[^a-zA-Z0-9ぁ-んァ-ヶ一-龠_-]+/g,"_");
+}
+async function exportJsonSafe(data,name){
+  return exportFileSafe(JSON.stringify(data,null,2),"application/json;charset=utf-8",name);
+}
+async function exportCsvSafe(csv,name){
+  return exportFileSafe(csv,"text/csv;charset=utf-8",name);
+}
+function carteKpi(label,value,small="/100"){
+  const v=(value===null||value===undefined||value==="")?"—":value;
+  return `<div class="carte-kpi"><strong>${v}</strong><small>${label}${small?` ${small}`:""}</small></div>`;
+}
+function carteDeltaClass(v){return !Number.isFinite(v)||v===0?"flat":v>0?"up":"down"}
+function renderCarteComparison(cur,prev){
+  if(!prev)return `<div class="carte-section"><h3>前回との差</h3><p class="carte-muted">この記録より前の比較対象がありません。</p></div>`;
+  const fields=[["動画評価","overall"],["技術水準","techScore"],["再現性","reproScore"],["動作効率","efficiencyScore"],["連鎖伝達","transferScore"],["通常球能力","ordinaryAbility"],["フォア平均","forehandAvg"],["バック平均","backhandAvg"]];
+  const cards=fields.map(([label,key])=>{
+    const c=key in (cur.engine||{})?safeNum(cur.engine[key]):safeNum(cur[key]);
+    const p=key in (prev.engine||{})?safeNum(prev.engine[key]):safeNum(prev[key]);
+    const d=(Number.isFinite(c)&&Number.isFinite(p))?Math.round((c-p)*10)/10:NaN;
+    return `<div class="carte-kpi"><small>${label}</small><strong>${Number.isFinite(c)?c:"—"}</strong><div class="carte-delta ${carteDeltaClass(d)}">前回との差 ${Number.isFinite(d)?(d>0?"+":"")+d:"—"}</div></div>`;
+  }).join("");
+  const overallDelta=(Number.isFinite(cur.overall)&&Number.isFinite(prev.overall))?cur.overall-prev.overall:NaN;
+  let note="今回と前回の違いを表示しています。";
+  if(Number.isFinite(overallDelta)){
+    if(Math.abs(overallDelta)<=2)note="動画評価は前回とほぼ同水準です。";
+    else if(overallDelta>0)note="今回は前回より高い値ですが、継続的な上達とは断定しません。";
+    else note="今回は前回より低い値ですが、継続的な低下とは断定しません。";
+  }
+  return `<div class="carte-section"><h3>前回との差</h3><div class="carte-compare-grid">${cards}</div><p class="carte-muted">${note}</p></div>`;
+}
+function shotTableHTML(list){
+  if(!list?.length)return '<p class="carte-muted">1球ごとの詳細は保存されていません。</p>';
+  return `<div class="carte-shot-wrap"><table class="carte-shot-table"><thead><tr><th>#</th><th>時刻</th><th>種別</th><th>総合</th><th>品質</th><th>手首加速</th><th>腕</th><th>下半身</th><th>体幹</th><th>戻り</th><th>伝達率</th><th>加速タイミング</th></tr></thead><tbody>${list.map(s=>`<tr><td>${s.no}</td><td>${Number.isFinite(s.t)?s.t.toFixed(2)+"秒":"—"}</td><td>${s.strokeType||s.strokeKey||"—"}</td><td>${s.total??"—"}</td><td>${s.candidateQuality??"—"}</td><td>${s.speedScore??"—"}</td><td>${s.elbowScore??"—"}</td><td>${s.kneeScore??"—"}</td><td>${s.torsoScore??"—"}</td><td>${s.recoveryScore??"—"}</td><td>${s.transferScore??"—"}</td><td>${s.timingScore??"—"}</td></tr>`).join("")}</tbody></table></div>`;
+}
+function frameTableHTML(list){
+  if(!list?.length)return '<p class="carte-muted">フレーム解析データは保存されていません。</p>';
+  return `<div class="carte-shot-wrap"><table class="carte-shot-table"><thead><tr><th>時刻</th><th>肘角</th><th>左膝</th><th>右膝</th><th>体幹傾斜</th><th>手首速度</th></tr></thead><tbody>${list.map(d=>`<tr><td>${Number.isFinite(d.t)?d.t.toFixed(2):"—"}</td><td>${Number.isFinite(d.elbow)?Math.round(d.elbow)+"°":"—"}</td><td>${Number.isFinite(d.leftKnee)?Math.round(d.leftKnee)+"°":"—"}</td><td>${Number.isFinite(d.rightKnee)?Math.round(d.rightKnee)+"°":"—"}</td><td>${Number.isFinite(d.torso)?d.torso.toFixed(1)+"°":"—"}</td><td>${Number.isFinite(d.wristSpeed)?d.wristSpeed.toFixed(2):"—"}</td></tr>`).join("")}</tbody></table></div>`;
+}
+function carteHTML(x,withCompare=true){
+  const hist=historyForPlayer(x.playerId).slice().sort((a,b)=>new Date(a.savedAt)-new Date(b.savedAt));
+  const idx=hist.findIndex(h=>h.id===x.id), prev=idx>0?hist[idx-1]:null;
+  const eng=x.engine||{};
+  const head=[carteKpi("動画フォーム評価",x.overall,"点"),carteKpi("技術水準",eng.techScore??x.techScore),carteKpi("再現性",eng.reproScore??x.reproScore),carteKpi("動作効率",eng.efficiencyScore??x.efficiencyScore),carteKpi("連鎖伝達効率",eng.transferScore??x.transferScore),carteKpi("通常球能力",eng.ordinaryAbility??x.ordinaryAbility),carteKpi("フォア平均",x.forehandAvg,"点"),carteKpi("バック平均",x.backhandAvg,"点")].join("");
+  const s=x.snapshots||{};
+  return `<div class="carte-section"><h3>${x.playerName||"選手"}　${compactDate(x.savedAt)} の分析カルテ</h3><p><strong>動画：</strong>${x.videoName||"—"}　 <strong>モード：</strong>${x.modeLabel||x.mode||"—"}　 <strong>利き手：</strong>${x.handLabel||x.hand||"—"}</p><p class="carte-muted">${x.gradeText||""}</p><p>${x.summaryText||""}</p><div class="carte-head">${head}</div></div>
+  ${withCompare?renderCarteComparison(x,prev):""}
+  <div class="carte-section"><h3>身体動作の数値</h3>${s.metrics||'<p class="carte-muted">この記録は旧形式または容量節約済みのため、詳細カルテはありません。点数・前回との差・推移履歴は利用できます。</p>'}</div>
+  <div class="carte-section"><h3>実測動作能力・評価エンジン</h3>${s.dynamicsScores||""}${s.engineScores||""}${s.waveInfo?`<p>${s.waveInfo}</p>`:""}${s.scaleInfo?`<p class="carte-muted">${s.scaleInfo}</p>`:""}${x.waveImage?`<img src="${x.waveImage}" alt="保存時の代表球速度波形" style="max-width:100%;border:1px solid var(--line);border-radius:10px">`:""}</div>
+  ${s.engineAdvice?`<div class="carte-section"><h3>個別コーチング評価</h3>${s.engineAdvice}</div>`:""}
+  ${s.bestWorst||s.shotCoach?`<div class="carte-section"><h3>最良球・改善球</h3>${s.bestWorst||""}${s.shotCoach||""}</div>`:""}
+  ${s.strokeGrowth?`<div class="carte-section"><h3>フォア・バック別 状態アドバイス</h3>${s.strokeGrowth}</div>`:""}
+  <div class="carte-section"><h3>1球ごとの記録</h3>${shotTableHTML(x.shots)}</div>
+  ${s.advice?`<div class="carte-section"><h3>AIフォーム評価・改善アドバイス</h3>${s.advice}</div>`:""}
+  <details class="carte-section"><summary><strong>フレーム解析データ</strong></summary>${frameTableHTML(x.frameData)}</details>`;
+}
+function analysisText(x){
+  if(!x)return "";
+  const eng=x.engine||window.__lastEngine||{};
+  const date=x.savedAt?new Date(x.savedAt).toLocaleString("ja-JP"):new Date().toLocaleString("ja-JP");
+  const lines=[
+    "【卓球フォームAI分析結果】",
+    `選手：${x.playerName||activePlayer().name||"—"}`,
+    `日時：${date}`,
+    `動画：${x.videoName||file.files?.[0]?.name||"—"}`,
+    `分析モード：${x.modeLabel||$("mode").selectedOptions?.[0]?.textContent||"—"}`,
+    `動画フォーム評価：${x.overall??eng.overall??"—"}点`,
+    `技術水準：${eng.techScore??x.techScore??"—"}`,
+    `再現性：${eng.reproScore??x.reproScore??"—"}`,
+    `動作効率：${eng.efficiencyScore??x.efficiencyScore??"—"}`,
+    `連鎖伝達効率：${eng.transferScore??x.transferScore??"—"}`,
+    `通常球能力：${eng.ordinaryAbility??x.ordinaryAbility??"—"}`,
+    `フォア平均：${x.forehandAvg??"—"}`,
+    `バック平均：${x.backhandAvg??"—"}`,
+    `重点課題：${x.focus||"—"}`
+  ];
+  const summary=x.summaryText||$("summary")?.textContent||"";
+  if(summary)lines.push("",`概要：${summary.replace(/\s+/g," ").trim()}`);
+  lines.push("","※映像から推定したフォーム評価です。ラケット面・回転量・正確な打球瞬間は直接測定していません。");
+  return lines.join("\n");
+}
+async function copyAnalysisText(x){
+  const text=analysisText(x);if(!text)return;
+  try{
+    if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(text);
+    else{const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();if(!document.execCommand("copy"))throw new Error("copy failed");ta.remove();}
+    if(shareStatus)shareStatus.textContent="分析結果をコピーしました。メールやメッセージに貼り付けられます。";
+    status.textContent="分析結果をコピーしました。";
+  }catch(e){alert("コピーできませんでした。共有ボタンからメールを開いてください。");}
+}
+async function shareAnalysisText(x){
+  const text=analysisText(x);if(!text)return;
+  const title=`卓球フォーム分析結果：${x.playerName||activePlayer().name||"選手"}`;
+  try{
+    if(navigator.share){await navigator.share({title,text});if(shareStatus)shareStatus.textContent="共有画面を開きました。";}
+    else location.href=`mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(text)}`;
+  }catch(e){if(e?.name!=="AbortError")await copyAnalysisText(x);}
+}
+function openCarte(id){
+  const x=loadHistory().find(h=>String(h.id)===String(id));if(!x)return alert("この分析記録が見つかりません。");
+  openedCarte=x;savedCarteView.innerHTML=carteHTML(x,true);savedCarteCard.classList.remove("hidden");if(shareStatus)shareStatus.textContent="";savedCarteCard.scrollIntoView({behavior:"smooth",block:"start"});
+}
+window.openCarte=openCarte;
+function compareCarte(id){
+  const x=loadHistory().find(h=>String(h.id)===String(id));if(!x)return;
+  const hist=historyForPlayer(x.playerId).slice().sort((a,b)=>new Date(a.savedAt)-new Date(b.savedAt));const idx=hist.findIndex(h=>h.id===x.id),prev=idx>0?hist[idx-1]:null;
+  openedCarte=x;savedCarteView.innerHTML=`<div class="carte-section"><h3>${x.playerName} の2回状態比較</h3><p>今回：${compactDate(x.savedAt)}${prev?` ／ 前回：${compactDate(prev.savedAt)}`:""}</p></div>`+renderCarteComparison(x,prev)+carteHTML(x,false);savedCarteCard.classList.remove("hidden");savedCarteCard.scrollIntoView({behavior:"smooth",block:"start"});
+}
+window.compareCarte=compareCarte;
+function printCarte(x){
+  if(!x)return;const w=window.open("","_blank");if(!w)return alert("印刷画面を開けませんでした。ポップアップを許可してください。");
+  const body=carteHTML(x,true);w.document.write(`<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>${x.playerName||"選手"} 分析カルテ</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#172033;margin:24px}.carte-section{border:1px solid #ccd7e6;border-radius:10px;padding:12px;margin:12px 0}.carte-head,.carte-compare-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.carte-kpi{border:1px solid #d8e1ed;border-radius:8px;padding:8px}.carte-kpi strong{display:block;font-size:20px}.carte-kpi small,.carte-muted{color:#667085}.carte-shot-table{width:100%;border-collapse:collapse;font-size:10px}.carte-shot-table th,.carte-shot-table td{border-bottom:1px solid #ddd;padding:5px;text-align:left}img{max-width:100%}button{display:none}@media print{details{display:block}.carte-section{break-inside:avoid}.carte-shot-table{font-size:9px}}</style></head><body><h1>卓球フォームAI分析カルテ v3.9.29 PC History Guard</h1>${body}<script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`);w.document.close();
+}
+
+function deltaClass(v){return !Number.isFinite(v)||v===0?"change-flat":v>0?"change-up":"change-down"}
+function deltaText(v){return !Number.isFinite(v)?"—":v>0?`+${v}`:`${v}`}
+function compareEntries(cur,prev){
+  if(!cur||!prev)return "まだ比較できる履歴がありません。";
+  const cards=[["動画評価",cur.overall,prev.overall],["フォア平均",cur.forehandAvg,prev.forehandAvg],["バック平均",cur.backhandAvg,prev.backhandAvg]].map(([label,c,p])=>{
+    const d=Number.isFinite(c)&&Number.isFinite(p)?c-p:null;
+    return `<div class="compare-card"><span>${label}</span><strong>${Number.isFinite(c)?c:"—"}点</strong><span class="${deltaClass(d)}">前回との差 ${deltaText(d)}</span></div>`;
+  }).join("");
+  return `<h3>前回との差</h3><div class="compare-cards">${cards}</div><p>今回の重点課題は <strong>${cur.focus}</strong> です。</p>`;
+}
+function renderHistoryTable(){
+  const rows=historyForPlayer().slice().reverse();
+  $("historyRows").innerHTML=rows.length?rows.map(x=>`<tr><td>${compactDate(x.savedAt)}</td><td>${x.videoName||"—"}</td><td>${x.overall}</td><td>${Number.isFinite(x.careerLevel)?x.careerLevel+(x.careerLevelProvisional?"※":""):"—"}</td><td>${Number.isFinite(x.forehandAvg)?x.forehandAvg:"—"}</td><td>${Number.isFinite(x.backhandAvg)?x.backhandAvg:"—"}</td><td>${x.focus||"—"}</td><td><div class="history-item-actions"><button onclick="window.openCarte('${x.id}')">呼び出す</button><button class="gray" onclick="window.compareCarte('${x.id}')">比較</button><button class="gray" onclick="window.printSavedCarte('${x.id}')">印刷/PDF</button><button class="gray" onclick="window.exportSingleCarte('${x.id}')">JSON</button><button class="warn" onclick="window.deleteHistoryEntry('${x.id}')">この1件を削除</button></div></td></tr>`).join(""):`<tr><td colspan="8" class="muted">この選手の保存履歴はまだありません。</td></tr>`;
+}
+window.deleteHistoryEntry=id=>{const target=loadHistory().find(x=>String(x.id)===String(id));if(target&&!confirm(`${target.playerName||"この選手"} の ${compactDate(target.savedAt)} の分析カルテを削除しますか？`))return;saveHistoryStore(loadHistory().filter(x=>String(x.id)!==String(id)));if(openedCarte&&String(openedCarte.id)===String(id)){openedCarte=null;savedCarteCard.classList.add("hidden");savedCarteView.innerHTML=""}renderHistoryUI()}
+
+window.exportSingleCarte=async id=>{
+  const x=loadHistory().find(h=>String(h.id)===String(id));
+  if(!x)return alert("この分析記録が見つかりません。");
+  try{
+    await exportJsonSafe(
+      x,
+      `table-tennis-carte-${safeFileName(x.playerName)}-${new Date(x.savedAt).toISOString().slice(0,10)}.json`
+    );
+  }catch(e){
+    console.error(e);
+    alert("JSONの書き出しに失敗しました。");
+  }
+};
+window.printSavedCarte=id=>{const x=loadHistory().find(h=>String(h.id)===String(id));if(x)printCarte(x)};
+
+function drawTrendChart(){
+  const canvas=$("growthChart"),rect=canvas.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+  canvas.width=Math.max(600,Math.floor(rect.width*dpr));canvas.height=Math.max(260,Math.floor(rect.height*dpr));
+  const ctx=canvas.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);
+  const W=rect.width,H=rect.height,m={l:45,r:20,t:28,b:42},iw=W-m.l-m.r,ih=H-m.t-m.b,hist=historyForPlayer().slice(-12);
+  ctx.clearRect(0,0,W,H);ctx.fillStyle="#fff";ctx.fillRect(0,0,W,H);ctx.font="12px sans-serif";
+  [60,70,80,90,100].forEach(v=>{const y=m.t+(100-v)/40*ih;ctx.strokeStyle="#dbe3ef";ctx.beginPath();ctx.moveTo(m.l,y);ctx.lineTo(W-m.r,y);ctx.stroke();ctx.fillStyle="#667085";ctx.fillText(String(v),10,y+4)});
+  if(!hist.length){ctx.fillStyle="#667085";ctx.fillText("この選手の履歴を保存すると、ここに推移グラフが表示されます。",m.l+20,H/2);return}
+  const x=i=>hist.length===1?m.l+iw/2:m.l+i/(hist.length-1)*iw,y=v=>m.t+(100-v)/40*ih;
+  [{key:"overall",label:"総合",color:"#2563eb"},{key:"forehandAvg",label:"フォア",color:"#f59e0b"},{key:"backhandAvg",label:"バック",color:"#10b981"}].forEach((s,si)=>{
+    ctx.strokeStyle=s.color;ctx.fillStyle=s.color;ctx.lineWidth=2.5;ctx.beginPath();let open=false;
+    hist.forEach((r,i)=>{const v=r[s.key];if(!Number.isFinite(v)){open=false;return}if(!open){ctx.moveTo(x(i),y(v));open=true}else ctx.lineTo(x(i),y(v))});ctx.stroke();
+    hist.forEach((r,i)=>{const v=r[s.key];if(Number.isFinite(v)){ctx.beginPath();ctx.arc(x(i),y(v),3.5,0,Math.PI*2);ctx.fill()}});
+    ctx.fillStyle=s.color;ctx.fillRect(m.l+si*90,5,14,4);ctx.fillStyle="#344054";ctx.fillText(s.label,m.l+19+si*90,12);
+  });
+}
+
+function trendState(values){
+  const a=values.filter(Number.isFinite);
+  if(a.length<2)return {label:"記録不足",detail:"2回以上の記録で状態変化を判定します。",spread:NaN,slope:NaN};
+  const avg=mean(a);
+  const spread=stddev(a);
+  let slope=0;
+  if(a.length>=3){
+    const n=a.length, xm=(n-1)/2;
+    let num=0,den=0;
+    for(let i=0;i<n;i++){num+=(i-xm)*(a[i]-avg);den+=(i-xm)*(i-xm)}
+    slope=den?num/den:0;
+  }else slope=a[1]-a[0];
+
+  let label,detail;
+  if(spread<=2.5){
+    label="安定";
+    detail=`変動幅が小さく、${avg.toFixed(1)}点前後で安定しています。`;
+  }else if(spread>=7){
+    label="変動大";
+    detail=`記録ごとの差が大きく、SD ${spread.toFixed(1)}。調子や練習条件の影響を受けやすい状態です。`;
+  }else if(slope>=2){
+    label="最近高め";
+    detail=`最近の記録が過去平均より高めです。ただし一方向の上達とは断定しません。`;
+  }else if(slope<=-2){
+    label="最近低め";
+    detail=`最近の記録が過去平均より低めです。体調・内容・撮影条件なども含めて確認します。`;
+  }else{
+    label="上下しながら推移";
+    detail=`${avg.toFixed(1)}点前後を中心に上下しています。`;
+  }
+  return {label,detail,spread,slope,avg};
+}
+function renderPerformanceStateSummary(){
+  const el=$("performanceStateSummary"); if(!el)return;
+  const hist=historyForPlayer().slice(-12);
+  if(hist.length<2){
+    el.textContent="履歴が2回以上になると、安定・変動・最近の傾向を表示します。";
+    return;
+  }
+  const defs=[
+    ["動画評価","overall"],
+    ["フォア","forehandAvg"],
+    ["バック","backhandAvg"],
+    ["技術水準","techScore"],
+    ["動作効率","efficiencyScore"],
+    ["連鎖伝達","transferScore"]
+  ];
+  const cards=defs.map(([label,key])=>{
+    const vals=hist.map(x=>{
+      if(key in x && Number.isFinite(x[key]))return x[key];
+      if(x.engine && Number.isFinite(x.engine[key]))return x.engine[key];
+      return NaN;
+    });
+    const s=trendState(vals);
+    return `<div class="compare-card"><span>${label}</span><strong>${s.label}</strong><span>${s.detail}</span></div>`;
+  }).join("");
+  el.innerHTML=`<h3>現在のパフォーマンス状態</h3><div class="compare-cards">${cards}</div>
+  <p class="muted">※ 点数の上下を自動的に「変化」「低下」とは判断しません。記録の安定性と最近の位置を示しています。</p>`;
+}
+
+function renderHistoryUI(){
+  const p=activePlayer(),h=historyForPlayer();$("historyPlayerName").textContent=p.name;renderHistoryTable();drawTrendChart();renderPerformanceStateSummary();
+  if(lastAnalysisSummary&&lastAnalysisSummary.playerId===p.id&&h.length)$("previousCompare").innerHTML=compareEntries(lastAnalysisSummary,h[h.length-1]);
+  else if(h.length>=2)$("previousCompare").innerHTML=compareEntries(h[h.length-1],h[h.length-2]);
+  else $("previousCompare").textContent="まだ比較できる履歴がありません。";
+}
+function openPlayerModal(edit=false){
+  editingPlayerId=edit?activePlayerId():null;
+  const p=activePlayer();playerModalTitle.textContent=edit?"選手プロフィールを編集":"新しい選手";
+  playerNameInput.value=edit?p.name:"";playerHandInput.value=edit?(p.hand||"right"):($("hand").value||"right");
+  playerConditionInput.value=edit?(p.condition||"standard"):"standard";
+  playerModal.classList.remove("hidden");setTimeout(()=>playerNameInput.focus(),30);
+}
+function closePlayerModal(){playerModal.classList.add("hidden");editingPlayerId=null}
+playerSelect.onchange=()=>setActivePlayer(playerSelect.value);
+addPlayerBtn.onclick=()=>openPlayerModal(false);
+editPlayerBtn.onclick=()=>openPlayerModal(true);
+cancelPlayerBtn.onclick=closePlayerModal;
+savePlayerBtn.onclick=()=>{
+  const name=playerNameInput.value.trim();if(!name){alert("選手名を入力してください。");return}
+  const ps=loadPlayers();
+  if(editingPlayerId){
+    const p=ps.find(x=>x.id===editingPlayerId);if(p&&!p.system){p.name=name;p.hand=playerHandInput.value;p.condition=playerConditionInput.value}
+    savePlayers(ps);saveHistoryStore(loadHistory().map(h=>h.playerId===editingPlayerId?{...h,playerName:name}:h));setActivePlayer(editingPlayerId,{clearSession:false});
+  }else{
+    const p={id:makeId(),name,hand:playerHandInput.value,condition:playerConditionInput.value,createdAt:new Date().toISOString()};ps.push(p);savePlayers(ps);localStorage.setItem(ACTIVE_PLAYER_KEY,p.id);renderPlayerSelect();setActivePlayer(p.id);
+  }
+  closePlayerModal();renderPlayerSelect();
+};
+try{
+  migrateOldHistory();
+}catch(e){
+  console.warn("履歴移行をスキップしました",e);
+}
+try{
+  renderPlayerSelect();
+}catch(e){
+  console.warn("選手表示の初期化をスキップしました",e);
+}
+try{
+  renderHistoryUI();
+}catch(e){
+  console.warn("履歴表示の初期化をスキップしました。AI分析は継続できます。",e);
+  const h=$("historyList");
+  if(h) h.innerHTML='<div class="muted">履歴表示の読み込みで問題が発生しました。AI分析機能は使用できます。</div>';
+}
+
+initBtn.onclick=async()=>{
+  try{
+    initBtn.disabled=true; status.textContent="MediaPipe AIモデルを読み込んでいます…";
+    await loadVisionLibrary();
+    const vision=await FilesetResolver.forVisionTasks(WASM);
+    pose=await PoseLandmarker.createFromOptions(vision,{
+      baseOptions:{modelAssetPath:MODEL,delegate:"GPU"},
+      runningMode:"VIDEO",numPoses:1,
+      minPoseDetectionConfidence:.30,minPosePresenceConfidence:.30,minTrackingConfidence:.30
+    });
+    status.textContent="AI準備完了。動画を選んで「動画をAI分析」を押してください。";
+    analyzeBtn.disabled=!video.src; liveBtn.disabled=!video.src;
+  }catch(e){
+    console.error(e); status.textContent="AIの読み込みに失敗しました。GPU設定を外して再試行します…";
+    try{
+      const vision=await FilesetResolver.forVisionTasks(WASM);
+      pose=await PoseLandmarker.createFromOptions(vision,{baseOptions:{modelAssetPath:MODEL},runningMode:"VIDEO",numPoses:1});
+      status.textContent="AI準備完了（CPUモード）。";
+      analyzeBtn.disabled=!video.src; liveBtn.disabled=!video.src;
+    }catch(e2){console.error(e2);status.textContent="AIモデルを読み込めませんでした。インターネット接続とブラウザ設定を確認してください。";initBtn.disabled=false;}
+  }
+};
+
+function angle(a,b,c){
+  if(!a||!b||!c)return NaN;
+  const ab={x:a.x-b.x,y:a.y-b.y,z:(a.z||0)-(b.z||0)}, cb={x:c.x-b.x,y:c.y-b.y,z:(c.z||0)-(b.z||0)};
+  const dot=ab.x*cb.x+ab.y*cb.y+ab.z*cb.z;
+  const ma=Math.hypot(ab.x,ab.y,ab.z), mb=Math.hypot(cb.x,cb.y,cb.z);
+  if(!ma||!mb)return NaN;
+  return Math.acos(Math.max(-1,Math.min(1,dot/(ma*mb))))*180/Math.PI;
+}
+function torsoLean(lm){
+  if(!visOK(lm,[11,12,23,24],.16))return NaN;
+  const sx=(lm[11].x+lm[12].x)/2, sy=(lm[11].y+lm[12].y)/2;
+  const hx=(lm[23].x+lm[24].x)/2, hy=(lm[23].y+lm[24].y)/2;
+  const dx=sx-hx, dy=sy-hy;
+  return Math.abs(Math.atan2(dx,-dy)*180/Math.PI);
+}
+function pointVisible(lm,i,threshold=.20){return !!lm?.[i] && (lm[i].visibility??1)>=threshold}
+function visOK(lm, ids, threshold=.20){return ids.every(i=>pointVisible(lm,i,threshold))}
+function corePoseOK(lm){
+  // For table tennis, legs/feet are often hidden by the table or other players.
+  // Require the hitting arm + shoulders + hips; legs are optional.
+  const right=$("hand").value==="right";
+  const sh=right?12:11, el=right?14:13, wr=right?16:15;
+  return visOK(lm,[11,12,23,24,sh,el,wr],.18);
+}
+function legPoseOK(lm){
+  return visOK(lm,[23,24,25,26,27,28],.18);
+}
+function waitSeek(t){
+  return new Promise((resolve,reject)=>{
+    const done=()=>{video.removeEventListener("seeked",done);setTimeout(resolve,25)};
+    video.addEventListener("seeked",done,{once:true});
+    video.currentTime=Math.min(Math.max(t,0),Math.max(0,video.duration-.001));
+    setTimeout(()=>{video.removeEventListener("seeked",done);resolve()},1200);
+  });
+}
+function drawPose(lm, targetCtx=ctx, w=overlay.width, h=overlay.height){
+  if(!lm)return;
+  const C=PoseLandmarker.POSE_CONNECTIONS;
+  targetCtx.save();
+  targetCtx.lineWidth=Math.max(2,w/320);
+  targetCtx.strokeStyle="#35e0a1"; targetCtx.fillStyle="#ffe85b";
+  for(const c of C){
+    const a=lm[c.start],b=lm[c.end]; if(!a||!b)continue;
+    targetCtx.beginPath();targetCtx.moveTo(a.x*w,a.y*h);targetCtx.lineTo(b.x*w,b.y*h);targetCtx.stroke();
+  }
+  for(const p of lm){if((p.visibility??1)<.35)continue;targetCtx.beginPath();targetCtx.arc(p.x*w,p.y*h,Math.max(2.5,w/220),0,Math.PI*2);targetCtx.fill();}
+  targetCtx.restore();
+}
+function captureFrame(lm){
+  // Memory-safe thumbnail only. Analysis still uses the original video resolution.
+  const srcW=Math.max(1,video.videoWidth||1280);
+  const srcH=Math.max(1,video.videoHeight||720);
+  const maxW=mobileLightMode.checked?360:640;
+  const scale=Math.min(1,maxW/srcW);
+  const w=Math.max(mobileLightMode.checked?240:320,Math.round(srcW*scale));
+  const h=Math.max(mobileLightMode.checked?135:180,Math.round(srcH*scale));
+
+  const c=document.createElement("canvas");
+  c.width=w;c.height=h;
+  const cctx=c.getContext("2d",{alpha:false});
+  cctx.drawImage(video,0,0,w,h);
+  drawPose(lm,cctx,w,h);
+  return c.toDataURL("image/jpeg",mobileLightMode.checked ? .52 : .68);
+}
+function percentile(arr,p){
+  const a=arr.filter(Number.isFinite).sort((x,y)=>x-y); if(!a.length)return NaN;
+  const i=Math.min(a.length-1,Math.max(0,Math.round((a.length-1)*p)));return a[i];
+}
+const mean=a=>{const b=a.filter(Number.isFinite);return b.length?b.reduce((x,y)=>x+y,0)/b.length:NaN}
+const range=a=>{const b=a.filter(Number.isFinite);return b.length?Math.max(...b)-Math.min(...b):NaN}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+function calcFrame(lm,t,prev){
+  const right=$("hand").value==="right", sh=right?12:11, el=right?14:13, wr=right?16:15;
+  const wrist=lm[wr], dt=prev?Math.max(.001,t-prev.t):NaN;
+  const wristSpeed=prev&&wrist&&prev.wrist?Math.hypot(wrist.x-prev.wrist.x,wrist.y-prev.wrist.y,(wrist.z||0)-(prev.wrist.z||0))/dt:0;
+  const leftKnee = visOK(lm,[23,25,27],.16) ? angle(lm[23],lm[25],lm[27]) : NaN;
+  const rightKnee = visOK(lm,[24,26,28],.16) ? angle(lm[24],lm[26],lm[28]) : NaN;
+  return {
+    t,lm,wrist:{x:wrist.x,y:wrist.y,z:wrist.z||0},
+    elbow:angle(lm[sh],lm[el],lm[wr]),
+    leftKnee,rightKnee,
+    torso:torsoLean(lm),wristSpeed,
+    lowerBodyVisible:Number.isFinite(leftKnee)||Number.isFinite(rightKnee)
+  };
+}
+function findPeaks(data, limit=5, thresholdP=.78, minGap=.55){
+  if(data.length<3)return [];
+  const vals=data.map(d=>d.wristSpeed), threshold=percentile(vals,thresholdP)||0;
+  const peaks=[];
+  for(let i=1;i<data.length-1;i++){
+    if(vals[i]>=threshold && vals[i]>vals[i-1] && vals[i]>=vals[i+1]){
+      if(!peaks.length || data[i].t-peaks[peaks.length-1].t>minGap) peaks.push(data[i]);
+      else if(vals[i]>peaks[peaks.length-1].wristSpeed) peaks[peaks.length-1]=data[i];
+    }
+  }
+  return peaks.sort((a,b)=>b.wristSpeed-a.wristSpeed).slice(0,limit).sort((a,b)=>a.t-b.t);
+}
+
+
+function detectStrokeCandidates(data, limit=8){
+  if(data.length<5)return [];
+
+  // Build several independent motion cues so compact backhands are not
+  // disadvantaged by a wrist-speed-only detector.
+  const speeds=data.map(d=>d.wristSpeed);
+  const elbowDelta=data.map((d,i)=>{
+    if(i===0)return 0;
+    const dt=Math.max(.001,d.t-data[i-1].t);
+    return Math.abs(d.elbow-data[i-1].elbow)/dt;
+  });
+
+  const speedP=percentile(speeds,.90)||1;
+  const elbowP=percentile(elbowDelta,.90)||1;
+  const right=$('hand').value==='right';
+  const wristIdx=right?16:15;
+
+  const energy=data.map((d,i)=>{
+    const side=Math.abs(bodySideCoord(d.lm,wristIdx));
+    // Central hand position is an important backhand cue.
+    const centralBonus=clamp(1.05-side,0,1.05)/1.05;
+    const speedN=clamp((speeds[i]||0)/speedP,0,1.8);
+    const elbowN=clamp((elbowDelta[i]||0)/elbowP,0,1.8);
+
+    // Wrist movement is still useful, but elbow motion and central position
+    // give compact backhands a much better chance to be selected.
+    return speedN*.52 + elbowN*.32 + centralBonus*.28;
+  });
+
+  const threshold=percentile(energy,.67)||0;
+  const peaks=[];
+  for(let i=2;i<data.length-2;i++){
+    const e=energy[i];
+    if(e>=threshold && e>=energy[i-1] && e>energy[i+1]){
+      const candidate={...data[i],motionEnergy:e};
+      if(!peaks.length || candidate.t-peaks[peaks.length-1].t>.42){
+        peaks.push(candidate);
+      }else if(e>peaks[peaks.length-1].motionEnergy){
+        peaks[peaks.length-1]=candidate;
+      }
+    }
+  }
+
+  // Score candidates for likely fore/back character, then intentionally
+  // retain both kinds when possible instead of only the fastest swings.
+  const annotated=peaks.map(p=>{
+    const c=classifyStroke(p,data);
+    return {...p,_stroke:c};
+  });
+
+  const fore=annotated.filter(p=>p._stroke.key==='forehand')
+    .sort((a,b)=>b.motionEnergy-a.motionEnergy);
+  const back=annotated.filter(p=>p._stroke.key==='backhand')
+    .sort((a,b)=>b.motionEnergy-a.motionEnergy);
+  const unknown=annotated.filter(p=>p._stroke.key==='unknown')
+    .sort((a,b)=>b.motionEnergy-a.motionEnergy);
+
+  const chosen=[];
+  const targetEach=Math.max(2,Math.floor(limit/2));
+  chosen.push(...fore.slice(0,targetEach), ...back.slice(0,targetEach));
+
+  const used=new Set(chosen.map(x=>x.t.toFixed(3)));
+  const rest=[...fore.slice(targetEach),...back.slice(targetEach),...unknown]
+    .sort((a,b)=>b.motionEnergy-a.motionEnergy);
+
+  for(const p of rest){
+    if(chosen.length>=limit)break;
+    if(!used.has(p.t.toFixed(3))){
+      chosen.push(p); used.add(p.t.toFixed(3));
+    }
+  }
+
+  return chosen.sort((a,b)=>a.t-b.t);
+}
+
+function mergeIntervals(peaks,dur){
+  const raw=peaks.map(p=>({a:Math.max(.01,p.t-.52),b:Math.min(dur-.01,p.t+.62)})).sort((x,y)=>x.a-y.a);
+  const merged=[];
+  for(const it of raw){
+    if(!merged.length || it.a>merged[merged.length-1].b+.08) merged.push({...it});
+    else merged[merged.length-1].b=Math.max(merged[merged.length-1].b,it.b);
+  }
+  return merged;
+}
+
+function bodySideCoord(lm, pointIdx){
+  // Body-local horizontal coordinate:
+  // left shoulder = -1, body center = 0, right shoulder = +1.
+  // Works even when the camera image is horizontally flipped.
+  const L=lm[11], R=lm[12], P=lm[pointIdx];
+  if(!L||!R||!P)return NaN;
+  const cx=(L.x+R.x)/2, cy=(L.y+R.y)/2;
+  const ax=(R.x-L.x)/2, ay=(R.y-L.y)/2;
+  const len2=ax*ax+ay*ay;
+  if(len2<1e-6)return NaN;
+  return ((P.x-cx)*ax+(P.y-cy)*ay)/len2;
+}
+
+function classifyStroke(peak, data){
+  if(!peak?.lm)return {type:'不明',key:'unknown',confidence:0,reason:'骨格不足'};
+
+  const rightHand=$('hand').value==='right';
+  const wristIdx=rightHand?16:15;
+  const elbowIdx=rightHand?14:13;
+
+  // Use a short trajectory around the candidate instead of one frame.
+  const win=data.filter(d=>d.t>=peak.t-.42 && d.t<=peak.t+.26 && d.lm);
+  const samples=win.length?win:[peak];
+
+  const wristSides=samples.map(d=>bodySideCoord(d.lm,wristIdx)).filter(Number.isFinite);
+  const elbowSides=samples.map(d=>bodySideCoord(d.lm,elbowIdx)).filter(Number.isFinite);
+
+  if(!wristSides.length)return {type:'不明',key:'unknown',confidence:0,reason:'手首位置不足'};
+
+  // Convert so + means hitting-hand side, - means opposite side.
+  const sign=rightHand?1:-1;
+  const ws=wristSides.map(v=>v*sign);
+  const es=elbowSides.map(v=>v*sign);
+
+  const peakSide=(bodySideCoord(peak.lm,wristIdx)||0)*sign;
+  const meanSide=mean(ws);
+  const minSide=Math.min(...ws), maxSide=Math.max(...ws);
+  const sideRange=maxSide-minSide;
+
+  // Trajectory direction around impact candidate.
+  const pre=win.filter(d=>d.t<peak.t-.05);
+  const post=win.filter(d=>d.t>peak.t+.05);
+  const preSide=pre.length?mean(pre.map(d=>bodySideCoord(d.lm,wristIdx)*sign).filter(Number.isFinite)):meanSide;
+  const postSide=post.length?mean(post.map(d=>bodySideCoord(d.lm,wristIdx)*sign).filter(Number.isFinite)):meanSide;
+  const outwardMove=postSide-preSide; // + = moving toward hitting-hand side
+
+  const elbowMean=es.length?mean(es):0;
+  const wristElbowGap=meanSide-elbowMean;
+
+  /*
+    Heuristic for table tennis:
+    - Forehand: wrist tends to stay farther on the hitting-hand side,
+      often outside the shoulder line, and may travel inward/outward with larger lateral excursion.
+    - Backhand: wrist is more central / across the body, elbow stays in front,
+      and the wrist often moves outward from near the center.
+  */
+  let foreScore=0, backScore=0;
+
+  // Position at/around impact
+  if(peakSide>1.10) foreScore+=4;
+  else if(peakSide>0.82) foreScore+=2;
+  else if(peakSide<0.62) backScore+=4;
+  else backScore+=2;
+
+  // Mean position through the swing
+  if(meanSide>1.00) foreScore+=3;
+  else if(meanSide<0.68) backScore+=4;
+  else if(meanSide<0.86) backScore+=2;
+
+  // Crossing / central preparation is a strong backhand cue
+  if(minSide<0.20) backScore+=4;
+  else if(minSide<0.58) backScore+=3;
+
+  // Very outside trajectory is a forehand cue
+  if(maxSide>1.35) foreScore+=3;
+  else if(maxSide>1.05) foreScore+=1;
+
+  // Backhand often moves from center toward hitting side near impact
+  if(preSide<0.72 && outwardMove>0.04) backScore+=4;
+  if(preSide>0.85 && sideRange>0.25) foreScore+=2;
+
+  // Elbow/wrist geometry
+  if(elbowMean<0.62 && meanSide<0.82) backScore+=3;
+  if(meanSide<0.78 && sideRange<0.85) backScore+=2;
+  if(preSide<0.70 && peakSide<0.85) backScore+=2;
+  if(wristElbowGap>0.55 && meanSide>0.85) foreScore+=1;
+
+  const total=foreScore+backScore || 1;
+  const diff=Math.abs(foreScore-backScore);
+  const confidence=Math.round(clamp(55 + diff/total*40,55,95));
+
+  if(backScore>foreScore){
+    return {
+      type:'バック推定',key:'backhand',confidence,
+      reason:`中心寄りの手首軌道（中心度 ${meanSide.toFixed(2)}）`
+    };
+  }
+  return {
+    type:'フォア推定',key:'forehand',confidence,
+    reason:`利き手側の手首軌道（外側度 ${meanSide.toFixed(2)}）`
+  };
+}
+
+function metricScore(value,goodMin,goodMax,tolerance){
+  if(!Number.isFinite(value))return 50;
+  if(value>=goodMin&&value<=goodMax)return 90;
+  const d=value<goodMin?goodMin-value:value-goodMax;
+  return Math.round(clamp(90-d/tolerance*40,35,90));
+}
+function evaluate(data,peaks){
+  const elbows=data.map(d=>d.elbow), knees=data.map(d=>(d.leftKnee+d.rightKnee)/2), torsos=data.map(d=>d.torso);
+  const speed=data.map(d=>d.wristSpeed);
+  const avgKnee=mean(knees), kneeRange=range(knees), avgTorso=mean(torsos), elbowRange=range(elbows);
+  const speedP90=percentile(speed,.9), peakCount=peaks.length;
+  const ready=metricScore(avgKnee,135,165,45);
+  const lower=Math.round(clamp(45+(kneeRange||0)*2.4,40,92));
+  const arm=Math.round(clamp(45+(elbowRange||0)*1.3,40,94));
+  const torso=metricScore(avgTorso,6,28,25);
+  const rhythm=Math.round(clamp(55+Math.min(peakCount,4)*8+(speedP90||0)*10,45,93));
+  let recovery=65;
+  if(peaks.length){
+    const vals=peaks.map(p=>{
+      const later=data.filter(d=>d.t>p.t+.25&&d.t<p.t+.75);
+      if(!later.length)return 60;
+      const right=$("hand").value==="right", wr=right?16:15;
+      const hipX=later.map(d=>(d.lm[23].x+d.lm[24].x)/2);
+      const dist=later.map((d,i)=>Math.abs(d.lm[wr].x-hipX[i]));
+      return Math.round(clamp(92-mean(dist)*120,45,92));
+    });
+    recovery=Math.round(mean(vals));
+  }
+  const total=Math.round(mean([ready,lower,arm,torso,rhythm,recovery]));
+  return {total,ready,lower,arm,torso,rhythm,recovery,avgKnee,kneeRange,avgTorso,elbowRange,speedP90,peakCount};
+}
+
+function grade(s){return s>=88?"A：非常に良い":s>=78?"B：良好":s>=66?"C：改善余地あり":"D：基礎から調整"}
+
+function getModeKey(){
+  const m=$("mode").value;
+  if(m==="forehand") return "forehand";
+  if(m==="backhand") return "backhand";
+  return "overall";
+}
+
+function scoringProfileFor(strokeKey){
+  const modeKey=getModeKey();
+  const key = modeKey!=="overall" ? modeKey : (strokeKey==="forehand" || strokeKey==="backhand" ? strokeKey : "overall");
+  const profiles={
+    overall:{
+      key:"overall",label:"総合基準",badge:"ov",
+      weights:{speed:.25, elbow:.20, knee:.18, torso:.17, recovery:.20},
+      focus:"バランス型の総合基準"
+    },
+    forehand:{
+      key:"forehand",label:"フォア基準",badge:"fh",
+      weights:{speed:.21, elbow:.17, knee:.22, torso:.24, recovery:.16},
+      focus:"フォアは下半身・体幹・加速をやや重視"
+    },
+    backhand:{
+      key:"backhand",label:"バック基準",badge:"bh",
+      weights:{speed:.24, elbow:.28, knee:.14, torso:.14, recovery:.20},
+      focus:"バックは肘位置・前腕・戻りをやや重視"
+    }
+  };
+  return profiles[key];
+}
+
+function chooseRepresentative(shots, type="best"){
+  if(!shots.length)return null;
+  const value = s => s.torsoScore*1.2 + s.recoveryScore*1.15 + s.elbowScore*0.8 + s.speedScore*0.35 - Math.abs((s.kneeScore||0)-90)*0.03;
+  const sorted=[...shots].sort((a,b)=>{
+    if(type==="best"){
+      if(b.total!==a.total) return b.total-a.total;
+      if(value(b)!==value(a)) return value(b)-value(a);
+      return a.t-b.t;
+    }else{
+      if(a.total!==b.total) return a.total-b.total;
+      if(value(a)!==value(b)) return value(a)-value(b);
+      return a.t-b.t;
+    }
+  });
+  return sorted[0];
+}
+
+
+function shotMetricMap(raw, kind, extra={}){
+  const r=clamp(raw,45,96);
+  let v=competitiveMap(r);
+  // Old rules reward large ROM and saturate too easily.
+  if(kind==="arm" && Number.isFinite(extra.rom)){
+    const target=extra.strokeKey==="backhand"?58:72;
+    const dev=Math.abs(extra.rom-target);
+    v-=Math.max(0,Math.round((dev-28)*0.20));
+  }
+  if(kind==="lower" && Number.isFinite(extra.rom)){
+    // Do not reward simply bending/moving more. Favor a useful moderate range.
+    const dev=Math.abs(extra.rom-20);
+    v-=Math.max(0,Math.round((dev-16)*0.28));
+  }
+  if(kind==="torso" && Number.isFinite(extra.sd) && extra.sd>6){
+    v-=Math.round((extra.sd-6)*1.1);
+  }
+  return Math.round(clamp(v,40,96));
+}
+function candidateQualityForShot(s,d){
+  // v3.9.29 PC History Guard: candidate quality measures whether this looks like a distinct swing event,
+  // not how good/fast the player is. Low-skill but clearly detected strokes remain eligible.
+  if(!d?.valid)return 35;
+  const series=d.series||[];
+  const pre=series.filter(x=>x.rel>=-.42&&x.rel<=-.14&&Number.isFinite(x.wristVSm));
+  const post=series.filter(x=>x.rel>=.12&&x.rel<=.40&&Number.isFinite(x.wristVSm));
+  const base=pre.length?medianNum(pre.map(x=>x.wristVSm)):NaN;
+  const postMed=post.length?medianNum(post.map(x=>x.wristVSm)):NaN;
+  const peak=d.peakV;
+  const prominence=(Number.isFinite(peak)&&Number.isFinite(base))?Math.max(0,peak-base):NaN;
+  const relativeProm=(Number.isFinite(prominence)&&Number.isFinite(base))?prominence/Math.max(.65,base):NaN;
+  const promScore=Number.isFinite(relativeProm)?scorePiecewise(relativeProm,[
+    [0,35],[.18,45],[.35,56],[.55,68],[.80,80],[1.10,89],[1.60,95]
+  ]):NaN;
+  const drop=(Number.isFinite(peak)&&Number.isFinite(postMed))?(peak-postMed)/Math.max(peak,.5):NaN;
+  const shapeScore=Number.isFinite(drop)?scorePiecewise(drop,[
+    [-.20,38],[0,48],[.10,58],[.22,70],[.35,82],[.50,92],[.65,96]
+  ]):NaN;
+  const timingScore=Number.isFinite(d.peakOffset)
+    ? Math.round(clamp(96-Math.max(0,Math.abs(d.peakOffset)-.04)*180,42,96)):NaN;
+  const sampleScore=series.length>=11?94:series.length>=8?84:series.length>=6?70:55;
+  const classScore=Number.isFinite(s.strokeConfidence)?clamp(s.strokeConfidence,55,95):70;
+  return Math.round(clamp(weightedAvailable([
+    [promScore,.42],[shapeScore,.23],[timingScore,.18],[sampleScore,.10],[classScore,.07]
+  ],55),35,97));
+}
+function newShotTotal(s){
+  const d=dynamicsForShot(s);
+  const timing=d.valid?{score:d.timingDynScore,offset:d.peakOffset}:accelerationTimingForShot(s);
+  const efficiency=Math.round(clamp(efficiencyForShot(s),45,96));
+
+  const poseQuality=weightedAvailable([
+    [s.speedScore,.18],[s.elbowScore,.24],[s.kneeScore,.18],
+    [s.torsoScore,.22],[s.recoveryScore,.18]
+  ],NaN);
+  const dynScore=d.valid?d.dynamicsTotal:NaN;
+  const transferScore=d.valid?d.transferScore:NaN;
+  const total=weightedAvailable([
+    [dynScore,.62],[transferScore,.18],[poseQuality,.12],[efficiency,.08]
+  ],poseQuality);
+  const candidateQuality=candidateQualityForShot(s,d);
+
+  return {
+    total:Math.round(clamp(total,38,96)),
+    timingScore:timing.score,timingOffset:timing.offset,efficiencyScore:efficiency,transferScore,
+    dynamicsTotal:dynScore,
+    speedDynScore:d.valid?d.speedDynScore:NaN,
+    riseDynScore:d.valid?d.riseDynScore:NaN,
+    chainDynScore:d.valid?d.chainOrderScore:NaN,
+    decelDynScore:d.valid?d.decelScore:NaN,
+    readyDynScore:d.valid?d.readyScore:NaN,
+    decelTime:d.valid?d.decelTime:NaN,
+    readyTime:d.valid?d.readyTime:NaN,
+    peakNormSpeed:d.valid?d.peakV:NaN,
+    candidateQuality,
+    measurementValid:!!d.valid
+  };
+}
+
+function scoreShot(peak, data){
+  const stroke=classifyStroke(peak, data);
+  const profile=scoringProfileFor(stroke.key);
+
+  const before = data.filter(d => d.t >= peak.t - 0.45 && d.t < peak.t);
+  const after  = data.filter(d => d.t > peak.t && d.t <= peak.t + 0.55);
+  const window = [...before, peak, ...after];
+
+  const speedAll = data.map(d=>d.wristSpeed);
+  const speedP95 = percentile(speedAll,.95) || 1;
+  const speedScore = Math.round(clamp(50 + (peak.wristSpeed/speedP95)*45, 45, 96));
+
+  const elbowVals = window.map(d=>d.elbow);
+  const elbowROM = range(elbowVals) || 0;
+  const elbowScore = Math.round(clamp(48 + elbowROM*0.72, 45, 95));
+
+  const kneeVals = window.map(d=>(d.leftKnee+d.rightKnee)/2);
+  const kneeROM = range(kneeVals) || 0;
+  const kneeScore = Math.round(clamp(50 + kneeROM*1.8, 45, 94));
+
+  const torsoVals = window.map(d=>d.torso);
+  const torsoSD = (() => {
+    const vals=torsoVals.filter(Number.isFinite);
+    if(!vals.length)return 99;
+    const m=mean(vals);
+    return Math.sqrt(mean(vals.map(v=>(v-m)*(v-m))));
+  })();
+  const torsoScore = Math.round(clamp(94 - torsoSD*7, 45, 94));
+
+  let recoveryScore = 62;
+  if(after.length){
+    const right=$("hand").value==="right", wr=right?16:15;
+    const later = after.filter(d=>d.t >= peak.t+.25);
+    if(later.length){
+      const dist = later.map(d=>{
+        const hipX=(d.lm[23].x+d.lm[24].x)/2;
+        return Math.abs(d.lm[wr].x-hipX);
+      });
+      recoveryScore=Math.round(clamp(94-mean(dist)*125,45,94));
+    }
+  }
+
+  const rawScores={speedScore,elbowScore,kneeScore,torsoScore,recoveryScore};
+  const baseShot={
+    t:peak.t,
+    speedScore:shotMetricMap(speedScore,"speed",{strokeKey:stroke.key}),
+    elbowScore:shotMetricMap(elbowScore,"arm",{rom:elbowROM,strokeKey:stroke.key}),
+    kneeScore:shotMetricMap(kneeScore,"lower",{rom:kneeROM,strokeKey:stroke.key}),
+    torsoScore:shotMetricMap(torsoScore,"torso",{sd:torsoSD,strokeKey:stroke.key}),
+    recoveryScore:shotMetricMap(recoveryScore,"recovery",{strokeKey:stroke.key}),
+    rawSpeedScore:speedScore,rawElbowScore:elbowScore,rawKneeScore:kneeScore,rawTorsoScore:torsoScore,rawRecoveryScore:recoveryScore,
+    wristSpeed:peak.wristSpeed,elbow:peak.elbow,
+    elbowROM,kneeROM,torsoSD,
+    strokeType:stroke.type,strokeKey:stroke.key,strokeConfidence:stroke.confidence,strokeReason:stroke.reason,
+    scoreProfileKey:profile.key,scoreProfileLabel:profile.label,scoreProfileBadge:profile.badge,scoreProfileFocus:profile.focus,
+    lm:peak.lm,
+    motionEnergy:Number.isFinite(peak.motionEnergy)?peak.motionEnergy:NaN
+  };
+  const ns=newShotTotal(baseShot);
+  return {...baseShot,total:ns.total,timingScore:ns.timingScore,timingOffset:ns.timingOffset,efficiencyShotScore:ns.efficiencyScore,transferScore:ns.transferScore,dynamicsTotal:ns.dynamicsTotal,speedDynScore:ns.speedDynScore,riseDynScore:ns.riseDynScore,chainDynScore:ns.chainDynScore,decelDynScore:ns.decelDynScore,readyDynScore:ns.readyDynScore,decelTime:ns.decelTime,readyTime:ns.readyTime,peakNormSpeed:ns.peakNormSpeed,candidateQuality:ns.candidateQuality,measurementValid:ns.measurementValid};
+}
+
+function shotReason(s, best=false){
+  const metrics=[
+    ["手首加速",s.speedScore],
+    ["腕の使い方",s.elbowScore],
+    ["下半身",s.kneeScore],
+    ["体幹安定",s.torsoScore],
+    ["戻り",s.recoveryScore]
+  ].sort((a,b)=> best ? b[1]-a[1] : a[1]-b[1]);
+
+  if(best){
+    return `${metrics[0][0]}（${metrics[0][1]}点）と${metrics[1][0]}（${metrics[1][1]}点）が特に良好でした。`;
+  }
+  return `${metrics[0][0]}（${metrics[0][1]}点）と${metrics[1][0]}（${metrics[1][1]}点）が主な改善ポイントです。`;
+}
+
+function shotAdvice(s){
+  const vals=[
+    ["speed",s.speedScore],["elbow",s.elbowScore],["knee",s.kneeScore],
+    ["torso",s.torsoScore],["recovery",s.recoveryScore]
+  ].sort((a,b)=>a[1]-b[1]);
+  const key=vals[0][0];
+  const isFore=s.scoreProfileKey==="forehand";
+  const isBack=s.scoreProfileKey==="backhand";
+
+  const common={
+    speed:"インパクト付近の加速をもう少し鋭くしましょう。力むより、打球直前に前腕を加速させる意識が効果的です。",
+    knee:"下半身の動きが小さめです。打つ前に軽く沈み、打球と同時に戻る動きを入れてみましょう。",
+    torso:"打球前後で体幹の軸が揺れています。前傾角を保ち、頭の位置を大きく動かさないことを意識してください。",
+    recovery:"打球後の戻りを速くしましょう。ラケットを振り切ったまま止めず、すぐ身体の前へ戻してください。"
+  };
+  const fore={
+    speed:"フォアでは腰から先に動き、インパクト直前に腕が自然に加速する流れを作りましょう。",
+    elbow:"フォアでは肘を引きすぎず、肩と腰の回転に合わせて前腕が自然に前へ出る幅を作りましょう。",
+    knee:"フォアでは重心移動が出ると質が上がります。右利きなら右脚→左脚へ軽く乗る感覚を加えてみましょう。",
+    torso:"フォアでは体幹回旋がポイントです。前傾を保ちつつ、腰と肩の向きが連動して変わるか確認してください。",
+    recovery:"フォアの後は戻りが遅れやすいです。打球後すぐにニュートラルへ戻し、次球への準備を急ぎましょう。"
+  };
+  const back={
+    speed:"バックでは小さく鋭い加速が大切です。打球直前の前腕の加速を少し強めてみましょう。",
+    elbow:"バックでは肘を固定しすぎず、身体の前に残したまま前腕が自然に動ける幅を作りましょう。",
+    knee:"バックでは低い姿勢を保ちながら、打球時に膝を少し使って前へ運ぶ感覚を持つと安定します。",
+    torso:"バックでは前傾を保ったまま、上体だけで起こしにいかないことが重要です。",
+    recovery:"バックでは打球後のラケットの戻りが重要です。振り終わりを大きくしすぎず、すぐ前に戻しましょう。"
+  };
+
+  if(isFore) return fore[key];
+  if(isBack) return back[key];
+  return common[key];
+}
+
+function modeSpecificCoaching(shotScores){
+  const groups={forehand:[],backhand:[],unknown:[]};
+  (shotScores||[]).forEach(s=>(groups[s.strokeKey]||groups.unknown).push(s));
+  const avg = a => a.length ? Math.round(mean(a.map(x=>x.total))) : null;
+  const mode=$("mode").value;
+
+  if(mode==="forehand"){
+    return "フォアモードでは、下半身の押し出し・体幹回旋・前方向への加速を特に重視しています。";
+  }
+  if(mode==="backhand"){
+    return "バックモードでは、肘を身体の前に保つこと・前腕の使い方・戻りの速さを特に重視しています。";
+  }
+  const parts=[];
+  if(groups.forehand.length) parts.push(`フォア推定 ${groups.forehand.length}球（平均 ${avg(groups.forehand)}点）`);
+  if(groups.backhand.length) parts.push(`バック推定 ${groups.backhand.length}球（平均 ${avg(groups.backhand)}点）`);
+  if(!parts.length) return "今回はフォア／バックの推定が十分に安定しませんでした。";
+  return `今回の代表的な打球は ${parts.join("、")} でした。総合モードでは球種ごとに基準を自動で切り替えています。`;
+}
+
+
+function averageMetrics(arr){
+  if(!arr.length)return null;
+  return {
+    total:Math.round(mean(arr.map(s=>s.total))),
+    speed:Math.round(mean(arr.map(s=>s.speedScore))),
+    elbow:Math.round(mean(arr.map(s=>s.elbowScore))),
+    knee:Math.round(mean(arr.map(s=>s.kneeScore))),
+    torso:Math.round(mean(arr.map(s=>s.torsoScore))),
+    recovery:Math.round(mean(arr.map(s=>s.recoveryScore)))
+  };
+}
+
+function weakestMetricLabel(s){
+  const vals=[
+    ["手首加速","speedScore"],["腕","elbowScore"],["下半身","kneeScore"],
+    ["体幹","torsoScore"],["戻り","recoveryScore"]
+  ].sort((a,b)=>s[a[1]]-s[b[1]]);
+  return vals[0][0];
+}
+
+function strongestMetricLabel(s){
+  const vals=[
+    ["手首加速","speedScore"],["腕","elbowScore"],["下半身","kneeScore"],
+    ["体幹","torsoScore"],["戻り","recoveryScore"]
+  ].sort((a,b)=>s[b[1]]-s[a[1]]);
+  return vals[0][0];
+}
+
+function strokeGrowthAdvice(key, avg, best, worst){
+  if(!avg || !best || !worst)return "";
+  const weak = [
+    ["手首加速",avg.speed],["腕",avg.elbow],["下半身",avg.knee],["体幹",avg.torso],["戻り",avg.recovery]
+  ].sort((a,b)=>a[1]-b[1]);
+  const primary=weak[0][0], secondary=weak[1][0];
+
+  const fore={
+    "手首加速":"腰と肩を先に動かし、打球直前に前腕が加速する流れを作りましょう。",
+    "腕":"肘を引きすぎず、体幹回旋に合わせて前腕が自然に前へ出る形を確認しましょう。",
+    "下半身":"右利きなら右脚から左脚へ軽く重心を移し、下半身から打球へ力を伝えましょう。",
+    "体幹":"前傾を保ちながら腰と肩を連動して回し、腕だけで振らないことを意識しましょう。",
+    "戻り":"フォロースルー後にラケットを素早く中央へ戻し、次球への準備を早くしましょう。"
+  };
+  const back={
+    "手首加速":"大きく振らず、打球直前に前腕を小さく鋭く加速させましょう。",
+    "腕":"肘を身体の前に残し、前腕が自然に開閉できる形を作りましょう。",
+    "下半身":"低い姿勢を保ちながら、膝を軽く使って前方向へ力を運びましょう。",
+    "体幹":"上体を起こさず、少し前傾したまま身体の前で打点を取る意識が有効です。",
+    "戻り":"打球後すぐにラケットを胸の前へ戻し、次のバック／フォアに備えましょう。"
+  };
+  const map=key==="forehand"?fore:back;
+
+  const drill = key==="forehand"
+    ? `次回は「${primary}」を最優先に、フォアを10〜20球。良い球が出たら最良球 ${best.t.toFixed(2)}秒 の動きに近いか確認してください。`
+    : `次回は「${primary}」を最優先に、バックを10〜20球。良い球が出たら最良球 ${best.t.toFixed(2)}秒 の動きに近いか確認してください。`;
+
+  return `
+    <div class="growth-box">
+      <strong>今回の重点ポイント：</strong>${map[primary]}<br>
+      <strong>第2課題：</strong>${secondary}<br>
+      <strong>次回の練習：</strong>${drill}
+    </div>`;
+}
+
+function renderStrokeGrowth(shotScores){
+  const groups={
+    forehand:shotScores.filter(s=>s.strokeKey==="forehand"),
+    backhand:shotScores.filter(s=>s.strokeKey==="backhand")
+  };
+
+  const renderPanel=(key,label,icon,cls)=>{
+    const arr=groups[key];
+    if(!arr.length){
+      return `<div class="stroke-panel ${cls}">
+        <div class="stroke-title"><h3>${icon} ${label}</h3></div>
+        <p class="stroke-summary">今回の動画では${label}候補を十分に検出できませんでした。</p>
+      </div>`;
+    }
+    const avg=averageMetrics(arr);
+    const bestScore=Math.max(...arr.map(s=>s.total));
+    const worstScore=Math.min(...arr.map(s=>s.total));
+    const bestGroup=arr.filter(s=>s.total===bestScore);
+    const worstGroup=arr.filter(s=>s.total===worstScore);
+    const best=chooseRepresentative(bestGroup,"best");
+    const worst=chooseRepresentative(worstGroup,"worst");
+
+    const diff=best.total-worst.total;
+    const tieBest=bestGroup.length>1?`<span class="tiebadge">同点 ${bestGroup.length}球</span>`:"";
+    const tieWorst=worstGroup.length>1?`<span class="tiebadge">同点 ${worstGroup.length}球</span>`:"";
+
+    return `<div class="stroke-panel ${cls}">
+      <div class="stroke-title">
+        <h3>${icon} ${label}</h3>
+        <span class="profile-badge ${key==="forehand"?"fh":"bh"}">平均 ${avg.total}点</span>
+      </div>
+      <div class="stroke-summary">${arr.length}球を検出。最良と改善球の差は <strong>${diff}点</strong>。平均で最も弱い項目は <strong>${[
+        ["手首加速",avg.speed],["腕",avg.elbow],["下半身",avg.knee],["体幹",avg.torso],["戻り",avg.recovery]
+      ].sort((a,b)=>a[1]-b[1])[0][0]}</strong> です。</div>
+
+      <div class="stroke-pair">
+        <div class="mini-shot best">
+          <strong>🏆 ${label}最良 ${tieBest}</strong>
+          <div class="time">${best.t.toFixed(2)}秒</div>
+          <div class="pts">${best.total}点</div>
+          <div>${strongestMetricLabel(best)}が特に良好</div>
+          <button onclick="window.seekShot(${best.t})" style="margin-top:8px">再生</button>
+        </div>
+        <div class="mini-shot worst">
+          <strong>🔧 ${label}改善 ${tieWorst}</strong>
+          <div class="time">${worst.t.toFixed(2)}秒</div>
+          <div class="pts">${worst.total}点</div>
+          <div>${weakestMetricLabel(worst)}を優先改善</div>
+          <button onclick="window.seekShot(${worst.t})" style="margin-top:8px">再生</button>
+        </div>
+      </div>
+
+      <div class="stroke-metrics">
+        <div>加速<strong>${avg.speed}</strong></div>
+        <div>腕<strong>${avg.elbow}</strong></div>
+        <div>下半身<strong>${avg.knee}</strong></div>
+        <div>体幹<strong>${avg.torso}</strong></div>
+        <div>戻り<strong>${avg.recovery}</strong></div>
+      </div>
+
+      ${strokeGrowthAdvice(key,avg,best,worst)}
+    </div>`;
+  };
+
+  $("strokeGrowth").innerHTML=
+    renderPanel("forehand","フォア","🟠","fh")+
+    renderPanel("backhand","バック","🟢","bh");
+  $("strokeGrowthCard").classList.remove("hidden");
+}
+
+
+function stddev(vals){
+  const a=vals.filter(Number.isFinite);
+  if(a.length<2)return 0;
+  const m=mean(a);
+  return Math.sqrt(mean(a.map(v=>(v-m)*(v-m))));
+}
+function mad(vals){
+  const a=vals.filter(Number.isFinite);
+  if(!a.length)return 0;
+  const m=mean(a);
+  return mean(a.map(v=>Math.abs(v-m)));
+}
+function scoreFromSpread(sd, good, bad){
+  if(sd<=good)return 96;
+  if(sd>=bad)return 50;
+  return Math.round(96-(sd-good)/(bad-good)*46);
+}
+function safeAvg(arr,key){
+  const vals=arr.map(x=>x[key]).filter(Number.isFinite);
+  return vals.length?mean(vals):NaN;
+}
+function nearbyFrames(t, before=.45, after=.30){
+  return analysisData.filter(d=>d.t>=t-before && d.t<=t+after);
+}
+function accelerationTimingForShot(shot){
+  const d=dynamicsForShot(shot);
+  if(d.valid&&Number.isFinite(d.peakOffset))return {score:d.timingDynScore,offset:d.peakOffset,peakTime:shot.t+d.peakOffset};
+  return {score:58,offset:NaN,peakTime:NaN};
+}
+function efficiencyForShot(s){
+  // v3.9.29 PC History Guard: measured-output / movement-cost efficiency.
+  // A compact swing is not automatically efficient; it must actually create speed,
+  // acceleration and a usable proximal-to-distal sequence.
+  const d=dynamicsForShot(s);
+  if(!d?.valid)return NaN;
+
+  // Movement demand is deliberately mild: the numerator (real measured output)
+  // should dominate. Large arm ROM and unstable torso/lower-body motion increase cost.
+  const armCost=1 + Math.max(0,(s.elbowROM||75)-78)/115;
+  const torsoCost=1 + Math.max(0,78-(s.torsoScore||78))/260;
+  const lowerCost=1 + Math.max(0,76-(s.kneeScore||76))/340;
+  const movementCost=armCost*torsoCost*lowerCost;
+
+  const peak=Number.isFinite(d.peakV)?d.peakV:NaN;
+  const rise=Number.isFinite(d.riseRate)?d.riseRate:NaN;
+  const chain=Number.isFinite(d.chainOrderScore)?d.chainOrderScore:NaN;
+  if(!Number.isFinite(peak))return NaN;
+
+  // Raw useful output preserves the actual speed difference. Rise and chain are
+  // multipliers, not substitutes for speed.
+  const riseFactor=Number.isFinite(rise)?(0.88 + clamp(rise,0,80)/180):1.0;
+  const chainFactor=Number.isFinite(chain)?(0.82 + clamp(chain,40,96)/360):1.0;
+  const usefulOutput=(peak*riseFactor*chainFactor)/movementCost;
+  const rawEfficiency=Math.round(clamp(scorePiecewise(usefulOutput,[
+    [0,35],[3,42],[5,49],[7,56],[9,63],[11,69],[13,74],[15,79],
+    [18,85],[21,90],[25,94],[30,97]
+  ]),35,97));
+  const transfer=transferEfficiencyMetrics(d.series,d.peakV,d.chainOrderScore,d.riseDynScore,d.speedDynScore);
+  // A fast hand created mainly by isolated distal motion should not receive the same
+  // efficiency score as equally fast output produced through a coherent chain.
+  return Math.round(clamp(weightedAvailable([[rawEfficiency,.52],[transfer.transferScore,.48]],rawEfficiency),35,97));
+}
+function measuredOutputScoreForShot(s){
+  const d=dynamicsForShot(s);
+  if(!d?.valid)return NaN;
+  // Output means what the player actually generated. Do not let clean posture
+  // compensate for low measured speed.
+  // v3.9.29 PC History Guard: player-separation output index. Peak speed is the main discriminator;
+  // rise and chain remain important, but cannot fully compensate for low actual output.
+  return Math.round(clamp(weightedAvailable([
+    [d.speedDynScore,.58],[d.riseDynScore,.17],[d.chainOrderScore,.17],[d.timingDynScore,.08]
+  ],d.speedDynScore),35,97));
+}
+
+function reproducibilityForGroup(arr){
+  if(arr.length<2)return {score:72,detail:"候補球が少ないため暫定評価"};
+  const sds={
+    speed:stddev(arr.map(s=>s.speedScore)),
+    elbow:stddev(arr.map(s=>s.elbowScore)),
+    knee:stddev(arr.map(s=>s.kneeScore)),
+    torso:stddev(arr.map(s=>s.torsoScore)),
+    recovery:stddev(arr.map(s=>s.recoveryScore))
+  };
+  const parts=[
+    scoreFromSpread(sds.speed,3.5,18),
+    scoreFromSpread(sds.elbow,3.5,18),
+    scoreFromSpread(sds.knee,4,20),
+    scoreFromSpread(sds.torso,4,20),
+    scoreFromSpread(sds.recovery,4,20)
+  ];
+  return {
+    score:Math.round(mean(parts)),
+    sds,
+    detail:`加速SD ${sds.speed.toFixed(1)} / 腕 ${sds.elbow.toFixed(1)} / 下半身 ${sds.knee.toFixed(1)} / 体幹 ${sds.torso.toFixed(1)} / 戻り ${sds.recovery.toFixed(1)}`
+  };
+}
+function personalDeviationForShot(s,group){
+  if(group.length<2)return 0;
+  const keys=["speedScore","elbowScore","kneeScore","torsoScore","recoveryScore"];
+  return mean(keys.map(k=>s[k]-safeAvg(group,k)));
+}
+function conditionAdjustment(profile, metricKey, score){
+  const c=profile?.condition||"standard";
+  let adjusted=score, note="";
+  if(c==="mobility_limited" || c==="mobility_back"){
+    if(metricKey==="recovery" || metricKey==="lower"){
+      adjusted=Math.round(score*.45+78*.55);
+      note="移動制限を考慮して重みを緩和";
+    }
+  }
+  if(c==="back_pain" || c==="mobility_back"){
+    if(metricKey==="torso"){
+      adjusted=Math.round(score*.50+80*.50);
+      note=note?note+"・腰への負担も考慮":"腰への負担を考慮して体幹評価を緩和";
+    }
+  }
+  return {score:adjusted,note};
+}
+
+
+
+function lmDist(a,b){
+  if(!a||!b)return NaN;
+  return Math.hypot(a.x-b.x,a.y-b.y);
+}
+function medianNum(vals){
+  const a=vals.filter(Number.isFinite).slice().sort((a,b)=>a-b);
+  if(!a.length)return NaN;
+  const m=Math.floor(a.length/2);
+  return a.length%2?a[m]:(a[m-1]+a[m])/2;
+}
+function percentileNum(vals,p){
+  const a=vals.filter(Number.isFinite).slice().sort((a,b)=>a-b);
+  if(!a.length)return NaN;
+  const i=(a.length-1)*p, lo=Math.floor(i), hi=Math.ceil(i);
+  if(lo===hi)return a[lo];
+  return a[lo]*(hi-i)+a[hi]*(i-lo);
+}
+function madNum(vals){
+  const m=medianNum(vals);
+  if(!Number.isFinite(m))return NaN;
+  return medianNum(vals.filter(Number.isFinite).map(v=>Math.abs(v-m)));
+}
+function robustSd(vals){
+  const m=medianNum(vals), mad=madNum(vals);
+  return Number.isFinite(mad)?mad*1.4826:NaN;
+}
+function shoulderWidthOf(lm){
+  return (lm&&lm[11]&&lm[12])?lmDist(lm[11],lm[12]):NaN;
+}
+function stableBodyScale(){
+  if(Number.isFinite(stableBodyScaleCache)) return stableBodyScaleCache;
+  // v3.9.4: one fixed scale for the whole video.
+  // This prevents a transiently narrow projected shoulder width from exploding speed.
+  const src=[
+    ...(typeof analysisData!=="undefined" && Array.isArray(analysisData)?analysisData:[]),
+    ...(typeof shotAnalysisData!=="undefined" && Array.isArray(shotAnalysisData)?shotAnalysisData:[])
+  ];
+  let widths=src.map(d=>shoulderWidthOf(d.lm)).filter(v=>Number.isFinite(v)&&v>.025&&v<.55);
+  if(widths.length<8){ stableBodyScaleCache=medianNum(widths); return stableBodyScaleCache; }
+  const m=medianNum(widths);
+  const mad=madNum(widths);
+  const tol=Math.max(m*.22,(Number.isFinite(mad)?mad*3.5:0));
+  const clean=widths.filter(v=>Math.abs(v-m)<=tol);
+  stableBodyScaleCache=medianNum(clean.length>=8?clean:widths);
+  return stableBodyScaleCache;
+}
+function pointSpeed(a,b,dt,scale){
+  if(!a||!b||!(dt>0)||!(scale>1e-5))return NaN;
+  return lmDist(a,b)/dt/scale;
+}
+function torsoAngleProxy(lm){
+  if(!lm||!lm[11]||!lm[12]||!lm[23]||!lm[24])return NaN;
+  const sx=(lm[11].x+lm[12].x)/2, sy=(lm[11].y+lm[12].y)/2;
+  const hx=(lm[23].x+lm[24].x)/2, hy=(lm[23].y+lm[24].y)/2;
+  return Math.atan2(sx-hx,Math.abs(sy-hy)+1e-6)*180/Math.PI;
+}
+function localDenseWindow(shot,before=.64,after=.72){
+  const fine=(typeof shotAnalysisData!=="undefined"?shotAnalysisData:[])
+    .filter(d=>d.t>=shot.t-before&&d.t<=shot.t+after&&d.lm);
+  if(fine.length>=7)return fine.slice().sort((a,b)=>a.t-b.t);
+  return (analysisData||[])
+    .filter(d=>d.t>=shot.t-before&&d.t<=shot.t+after&&d.lm)
+    .slice().sort((a,b)=>a.t-b.t);
+}
+function movingMedian(series,key,radius=1){
+  return series.map((p,i)=>{
+    const vals=[];
+    for(let j=Math.max(0,i-radius);j<=Math.min(series.length-1,i+radius);j++){
+      if(Number.isFinite(series[j][key]))vals.push(series[j][key]);
+    }
+    return medianNum(vals);
+  });
+}
+function deriveDynamicsSeries(shot){
+  const arr=localDenseWindow(shot);
+  const fixedScale=stableBodyScale();
+  const wristIdx=hand==="left"?15:16, elbowIdx=hand==="left"?13:14;
+  const shoulderIdx=hand==="left"?11:12, hipIdx=hand==="left"?23:24, kneeIdx=hand==="left"?25:26;
+  const out=[];
+
+  // v3.9.4: central difference over three pose samples.
+  // Much less sensitive to one-frame landmark jitter than adjacent-frame velocity.
+  for(let i=1;i<arr.length-1;i++){
+    const a=arr[i-1], mid=arr[i], c=arr[i+1], dt=c.t-a.t;
+    if(!(dt>0)||!Number.isFinite(fixedScale))continue;
+    const ta=torsoAngleProxy(a.lm),tc=torsoAngleProxy(c.lm);
+    out.push({
+      t:mid.t, rel:mid.t-shot.t,
+      wristV:pointSpeed(a.lm[wristIdx],c.lm[wristIdx],dt,fixedScale),
+      elbowV:pointSpeed(a.lm[elbowIdx],c.lm[elbowIdx],dt,fixedScale),
+      shoulderV:pointSpeed(a.lm[shoulderIdx],c.lm[shoulderIdx],dt,fixedScale),
+      hipV:pointSpeed(a.lm[hipIdx],c.lm[hipIdx],dt,fixedScale),
+      kneeV:pointSpeed(a.lm[kneeIdx],c.lm[kneeIdx],dt,fixedScale),
+      torsoV:(Number.isFinite(ta)&&Number.isFinite(tc))?Math.abs(tc-ta)/dt:NaN,
+      fixedScale
+    });
+  }
+
+  // robust 3-sample median smoothing
+  for(const key of ["wristV","elbowV","shoulderV","hipV","kneeV","torsoV"]){
+    const sm=movingMedian(out,key,1);
+    out.forEach((p,i)=>p[key+"Sm"]=sm[i]);
+  }
+
+  // acceleration from smoothed velocity, central-difference again
+  for(let i=1;i<out.length-1;i++){
+    const dt=out[i+1].t-out[i-1].t;
+    if(dt>0 && Number.isFinite(out[i-1].wristVSm) && Number.isFinite(out[i+1].wristVSm)){
+      out[i].wristAccSm=(out[i+1].wristVSm-out[i-1].wristVSm)/dt;
+    }
+  }
+  return out;
+}
+function robustPeakOf(series,key,from,to){
+  const a=series.filter(x=>x.rel>=from&&x.rel<=to&&Number.isFinite(x[key]));
+  if(!a.length)return null;
+  // Prefer a sustained high level: select among the top 20%, nearest the median time.
+  const q=percentileNum(a.map(x=>x[key]),.80);
+  const top=a.filter(x=>x[key]>=q);
+  const medT=medianNum(top.map(x=>x.t));
+  return top.slice().sort((x,y)=>{
+    const dx=Math.abs(x.t-medT),dy=Math.abs(y.t-medT);
+    return dx===dy?y[key]-x[key]:dx-dy;
+  })[0];
+}
+function neutralDistance(lm,shotLm,scale){
+  if(!lm||!shotLm||!Number.isFinite(scale))return NaN;
+  const wi=hand==="left"?15:16, ei=hand==="left"?13:14;
+  if(!lm[wi]||!lm[ei]||!lm[11]||!lm[12]||!shotLm[wi]||!shotLm[ei])return NaN;
+  // Neutral is estimated from hand/elbow location relative to shoulder center,
+  // not absolute screen position, so body translation is less influential.
+  const sc={x:(lm[11].x+lm[12].x)/2,y:(lm[11].y+lm[12].y)/2};
+  const ss={x:(shotLm[11].x+shotLm[12].x)/2,y:(shotLm[11].y+shotLm[12].y)/2};
+  const rw={x:(lm[wi].x-sc.x)/scale,y:(lm[wi].y-sc.y)/scale};
+  const re={x:(lm[ei].x-sc.x)/scale,y:(lm[ei].y-sc.y)/scale};
+  const sw={x:(shotLm[wi].x-ss.x)/scale,y:(shotLm[wi].y-ss.y)/scale};
+  const se={x:(shotLm[ei].x-ss.x)/scale,y:(shotLm[ei].y-ss.y)/scale};
+  return Math.hypot(rw.x-sw.x,rw.y-sw.y)*.65+Math.hypot(re.x-se.x,re.y-se.y)*.35;
+}
+function scorePiecewise(x, pts){
+  if(!Number.isFinite(x))return NaN;
+  if(x<=pts[0][0])return pts[0][1];
+  for(let i=1;i<pts.length;i++){
+    const [x1,y1]=pts[i-1], [x2,y2]=pts[i];
+    if(x<=x2){
+      const r=(x-x1)/(x2-x1 || 1);
+      return y1+(y2-y1)*r;
+    }
+  }
+  return pts[pts.length-1][1];
+}
+function speedScoreFromPeak(v){
+  // Preserve real speed differences instead of compressing everyone into the 80s.
+  // Unit: shoulder-widths / second after fixed-scale normalization and smoothing.
+  return Math.round(clamp(scorePiecewise(v,[
+    [0,35],[2,43],[4,54],[6,62],[8,68],[10,73],[12,78],[15,84],[18,89],[20,92],[24,95],[30,97]
+  ]),35,97));
+}
+function riseScoreFromRate(v){
+  return Math.round(clamp(scorePiecewise(v,[
+    [0,38],[4,46],[8,55],[12,63],[18,72],[25,80],[35,87],[50,92],[75,96]
+  ]),38,96));
+}
+function weightedAvailable(pairs, fallback=NaN){
+  const ok=pairs.filter(([v,w])=>Number.isFinite(v)&&Number.isFinite(w)&&w>0);
+  if(!ok.length)return fallback;
+  const sw=ok.reduce((a,[v,w])=>a+w,0);
+  return ok.reduce((a,[v,w])=>a+v*w,0)/sw;
+}
+function onsetTimeFor(series,key,from=-.52,to=.08){
+  const a=series.filter(x=>x.rel>=from&&x.rel<=to&&Number.isFinite(x[key]));
+  if(a.length<4)return NaN;
+  const early=a.filter(x=>x.rel<=Math.min(-.24,to-.12));
+  const base=medianNum((early.length>=2?early:a.slice(0,Math.max(2,Math.floor(a.length*.35)))).map(x=>x[key]));
+  const hi=percentileNum(a.map(x=>x[key]),.88);
+  if(!Number.isFinite(base)||!Number.isFinite(hi)||hi<=base)return NaN;
+  const threshold=base+(hi-base)*.30;
+  // Require two consecutive samples above threshold to reject landmark jitter.
+  for(let i=0;i<a.length-1;i++){
+    if(a[i][key]>=threshold && a[i+1][key]>=threshold*.92)return a[i].t;
+  }
+  return NaN;
+}
+function onsetChainScore(onsets){
+  const {hip,torso,elbow,wrist}=onsets;
+  if(![hip,torso,elbow,wrist].every(Number.isFinite))return {score:NaN,label:'データ不足',gaps:[]};
+  const g1=torso-hip, g2=elbow-torso, g3=wrist-elbow;
+  const gaps=[g1,g2,g3];
+  // Table tennis allows overlapping proximal segments. The key failure is the distal
+  // segment clearly starting first, not tiny overlaps between hip/torso/elbow.
+  let score=92;
+  const pairPenalty=g=> g < -.12 ? 24 : g < -.07 ? 14 : g < -.035 ? 7 : g > .30 ? 6 : 0;
+  score-=pairPenalty(g1)+pairPenalty(g2)+pairPenalty(g3);
+  const total=wrist-hip;
+  if(total<-.08) score-=24;               // wrist starts before lower-body drive
+  else if(total<.00) score-=12;
+  else if(total>.55) score-=8;            // chain too spread out / disconnected
+  else if(total>=.02 && total<=.32) score+=4;
+  // Reward useful overlap: hip/torso and torso/elbow may start almost together.
+  if(Math.abs(g1)<=.08)score+=2;
+  if(Math.abs(g2)<=.08)score+=2;
+  return {score:Math.round(clamp(score,35,97)),label:score>=82?'立ち上がり連鎖良好':score>=68?'立ち上がり連鎖は概ね良好':'立ち上がり順序に乱れ',gaps};
+}
+function segmentPeak(series,key,from=-.44,to=.18){
+  const a=series.filter(x=>x.rel>=from&&x.rel<=to&&Number.isFinite(x[key]));
+  if(!a.length)return NaN;
+  return percentileNum(a.map(x=>x[key]),.88);
+}
+function transferEfficiencyMetrics(series,peakV,chainOrderScore,riseDynScore,speedDynScore){
+  // v3.9.29 PC History Guard: proximal -> distal transfer efficiency.
+  // Same-unit translational speeds (shoulder-widths/sec) are used for hip/shoulder/elbow/wrist.
+  // A very high wrist/elbow ratio alone is NOT rewarded; distal-only motion is penalized by
+  // proximal participation and kinetic-chain onset order.
+  const elbowPeak=segmentPeak(series,"elbowVSm");
+  const shoulderPeak=segmentPeak(series,"shoulderVSm");
+  const hipPeak=segmentPeak(series,"hipVSm");
+  const kneePeak=segmentPeak(series,"kneeVSm");
+  const pairs=[[elbowPeak,.50],[shoulderPeak,.27],[hipPeak,.15],[kneePeak,.08]].filter(([v])=>Number.isFinite(v));
+  const sw=pairs.reduce((a,[v,w])=>a+w,0);
+  const proximalDemand=sw?pairs.reduce((a,[v,w])=>a+v*w,0)/sw:NaN;
+  const participation=(Number.isFinite(proximalDemand)&&Number.isFinite(peakV)&&peakV>0)?proximalDemand/peakV:NaN;
+  const amplification=(Number.isFinite(proximalDemand)&&Number.isFinite(peakV)&&proximalDemand>.05)?peakV/proximalDemand:NaN;
+
+  // Healthy transmission has clear distal amplification, but not an implausibly huge
+  // ratio caused by almost no proximal movement. The broad optimum allows FH/BH differences.
+  const amplificationScore=Number.isFinite(amplification)?Math.round(clamp(scorePiecewise(amplification,[
+    [.45,42],[.75,52],[1.0,63],[1.3,76],[1.7,87],[2.2,94],[2.9,92],[3.8,82],[5.2,66],[7.0,50]
+  ]),40,96)):NaN;
+  const participationScore=Number.isFinite(participation)?Math.round(clamp(scorePiecewise(participation,[
+    [.04,42],[.08,52],[.13,65],[.20,78],[.28,88],[.38,94],[.52,92],[.70,82],[.95,65],[1.25,48]
+  ]),40,96)):NaN;
+
+  const transferScore=Math.round(clamp(weightedAvailable([
+    [chainOrderScore,.34],[amplificationScore,.23],[participationScore,.13],
+    [speedDynScore,.18],[riseDynScore,.12]
+  ],NaN),35,97));
+  return {transferScore,amplificationScore,participationScore,amplification,participation,proximalDemand,elbowPeak,shoulderPeak,hipPeak,kneePeak};
+}
+function dynamicsForShot(shot){
+  const cacheKey=`${analysisRunId}:${Number(shot?.t).toFixed(4)}`;
+  if(dynamicsCache.has(cacheKey)) return dynamicsCache.get(cacheKey);
+  const series=deriveDynamicsSeries(shot);
+  if(series.length<5){
+    const miss={valid:false,series};
+    dynamicsCache.set(cacheKey,miss);
+    return miss;
+  }
+
+  const wristPeak=robustPeakOf(series,"wristVSm",-0.38,0.26);
+  const accPeak=robustPeakOf(series,"wristAccSm",-0.42,0.12);
+
+  const pre=series.filter(x=>x.rel>=-0.42&&x.rel<=-0.14&&Number.isFinite(x.wristVSm));
+  const base=pre.length?medianNum(pre.map(x=>x.wristVSm)):NaN;
+  const peakZone=series.filter(x=>wristPeak&&Math.abs(x.t-wristPeak.t)<=.09&&Number.isFinite(x.wristVSm));
+  const peakV=peakZone.length?medianNum(peakZone.map(x=>x.wristVSm)):wristPeak?.wristVSm;
+  const rise=Number.isFinite(peakV)&&Number.isFinite(base)?Math.max(0,peakV-base):NaN;
+  const riseTime=(wristPeak&&pre.length)?Math.max(.06,wristPeak.t-medianNum(pre.map(x=>x.t))):NaN;
+  const riseRate=(Number.isFinite(rise)&&Number.isFinite(riseTime))?rise/riseTime:NaN;
+
+  // v3.9.29 PC History Guard kinetic chain: compare motion ONSET, not peak order.
+  // Overlap is allowed; only clearly distal-first starts are penalized strongly.
+  const onsets={
+    hip:onsetTimeFor(series,"hipVSm",-.54,.06),
+    torso:onsetTimeFor(series,"torsoVSm",-.54,.06),
+    elbow:onsetTimeFor(series,"elbowVSm",-.46,.10),
+    wrist:onsetTimeFor(series,"wristVSm",-.44,.12)
+  };
+  const chain=onsetChainScore(onsets);
+  const chainOrderScore=chain.score;
+  const chainGaps=chain.gaps;
+  const chainLabel=chain.label;
+
+  let decelTime=NaN;
+  if(wristPeak&&Number.isFinite(peakV)){
+    const post=series.filter(x=>x.t>wristPeak.t&&Number.isFinite(x.wristVSm));
+    for(let i=0;i<post.length-1;i++){
+      if(post[i].wristVSm<=peakV*.48&&post[i+1].wristVSm<=peakV*.55){
+        decelTime=post[i].t-wristPeak.t; break;
+      }
+    }
+  }
+
+  let readyTime=NaN;
+  const dense=localDenseWindow(shot,.64,.72);
+  const scale=stableBodyScale();
+  const readyFrames=dense.filter(d=>d.t>=shot.t-.62&&d.t<=shot.t-.38&&d.lm);
+  if(readyFrames.length>=2&&Number.isFinite(scale)){
+    const readyLm=readyFrames[Math.floor(readyFrames.length/2)].lm;
+    const postFrames=dense.filter(d=>d.t>=shot.t+.08&&d.t<=shot.t+.70&&d.lm);
+    const baseTol=.42;
+    for(let i=0;i<postFrames.length-1;i++){
+      const d1=neutralDistance(postFrames[i].lm,readyLm,scale);
+      const d2=neutralDistance(postFrames[i+1].lm,readyLm,scale);
+      if(Number.isFinite(d1)&&Number.isFinite(d2)&&d1<=baseTol&&d2<=baseTol*1.15){
+        readyTime=postFrames[i].t-shot.t; break;
+      }
+    }
+  }
+
+  // IMPORTANT: not detected = NaN, not a low score. Missing evidence is excluded.
+  const decelScore=Number.isFinite(decelTime)
+    ? Math.round(clamp(94-(decelTime-.12)*80,42,96)):NaN;
+  const readyScore=Number.isFinite(readyTime)
+    ? Math.round(clamp(98-(readyTime-.24)*62,38,96)):NaN;
+
+  const peakOffset=wristPeak?.rel;
+  const timingDynScore=Number.isFinite(peakOffset)
+    ? Math.round(clamp(94-Math.abs(peakOffset+.05)*125,42,96)):NaN;
+
+  // Preserve measured differences. Do not compress 5 and 20 shoulder-width/s into near-equal scores.
+  const speedDynScore=speedScoreFromPeak(peakV);
+  const riseDynScore=riseScoreFromRate(riseRate);
+  const transfer=transferEfficiencyMetrics(series,peakV,chainOrderScore,riseDynScore,speedDynScore);
+  const transferScore=transfer.transferScore;
+
+  // v3.9.29 PC History Guard: measured execution now includes whether proximal movement is actually
+  // transferred into distal output, rather than treating chain order and hand speed separately.
+  const dynamicsTotal=Math.round(clamp(weightedAvailable([
+    [speedDynScore,.27],[riseDynScore,.18],[chainOrderScore,.18],[transferScore,.25],
+    [decelScore,.07],[timingDynScore,.05]
+  ],NaN),35,97));
+
+  const result={
+    valid:true,series,peakV,riseRate,peakOffset,
+    onsets,chainOrderScore,chainGaps,chainLabel,
+    decelTime,readyTime,decelScore,readyScore,timingDynScore,
+    speedDynScore,riseDynScore,transferScore,...transfer,dynamicsTotal,
+    fixedScale:scale
+  };
+  dynamicsCache.set(cacheKey,result);
+  return result;
+}
+function evaluateDynamics(shots){
+  const items=shots.map(s=>({shot:s,d:dynamicsForShot(s)})).filter(x=>x.d.valid);
+  if(!items.length)return null;
+  const vals=k=>items.map(x=>x.d[k]).filter(Number.isFinite);
+  const avg=k=>{const v=vals(k);return v.length?mean(v):NaN;};
+
+  // v3.9.29 PC History Guard chain consistency uses onset-time gaps across shots.
+  const gapSets=[0,1,2].map(i=>items.map(x=>x.d.chainGaps?.[i]).filter(Number.isFinite));
+  const gapSds=gapSets.map(robustSd).filter(Number.isFinite);
+  const gapMeds=gapSets.map(medianNum);
+  const gapSdMean=gapSds.length?mean(gapSds):NaN;
+  const chainConsistency=Number.isFinite(gapSdMean)
+    ? Math.round(clamp(96-gapSdMean*230,38,96)):NaN;
+  const orderVals=vals("chainOrderScore");
+  const chainOrder=orderVals.length?Math.round(mean(orderVals)):NaN;
+  const chainScore=Math.round(clamp(weightedAvailable([[chainOrder,.68],[chainConsistency,.32]],NaN),35,97));
+
+  const shotPeakVals=items.map(x=>x.d.peakV).filter(Number.isFinite);
+  const shotRiseVals=items.map(x=>x.d.riseRate).filter(Number.isFinite);
+  const peakMedian=medianNum(shotPeakVals);
+  const riseMedian=medianNum(shotRiseVals);
+  const speedScore=speedScoreFromPeak(peakMedian);
+  const riseScore=riseScoreFromRate(riseMedian);
+  const transferVals=vals("transferScore");
+  const transferMedian=transferVals.length?medianNum(transferVals):NaN;
+  const transferLower=transferVals.length?percentileNum(transferVals,.25):NaN;
+  const transferScore=transferVals.length?Math.round(clamp(weightedAvailable([[transferMedian,.72],[transferLower,.28]],transferMedian),35,97)):NaN;
+
+  const decelVals=vals("decelScore"), readyVals=vals("readyScore"), timingVals=vals("timingDynScore");
+  const decelScore=decelVals.length?Math.round(mean(decelVals)):NaN;
+  const readyScore=readyVals.length?Math.round(mean(readyVals)):NaN;
+  const timingScore=timingVals.length?Math.round(mean(timingVals)):NaN;
+
+  // v3.9.29 PC History Guard measured-execution score. The three discriminative measurements
+  // (stable speed, acceleration rise, chain onset) carry 82% of the weight.
+  // Next-ball readiness remains visible but is not part of the core score because
+  // it can be confused with ordinary body translation in a single-camera pose video.
+  const dynamicsTotal=Math.round(clamp(weightedAvailable([
+    [speedScore,.27],[riseScore,.18],[chainScore,.18],[transferScore,.25],
+    [decelScore,.07],[timingScore,.05]
+  ],NaN),35,97));
+
+  return {
+    items,speedScore,riseScore,chainScore,chainOrder,chainConsistency,transferScore,transferMedian,transferLower,
+    decelScore,readyScore,timingScore,dynamicsTotal,
+    peakV:peakMedian,riseRate:riseMedian,
+    decelTime:medianNum(items.map(x=>x.d.decelTime)),
+    readyTime:medianNum(items.map(x=>x.d.readyTime)),
+    peakOffset:medianNum(items.map(x=>x.d.peakOffset)),
+    chainGapSd:gapSdMean,
+    chainGapMedians:gapMeds,
+    fixedScale:medianNum(items.map(x=>x.d.fixedScale)),
+    readyDetected:readyVals.length, decelDetected:decelVals.length, timingDetected:timingVals.length,
+    chainDetected:orderVals.length
+  };
+}
+function drawWaveform(dyn){
+  const cv=$("waveCanvas"); if(!cv||!dyn?.items?.length)return;
+  const ctx=cv.getContext("2d"),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle="#fff";ctx.fillRect(0,0,W,H);
+  const best=dyn.items.slice().sort((a,b)=>b.d.dynamicsTotal-a.d.dynamicsTotal)[0].d;
+  const s=best.series.filter(x=>x.rel>=-.50&&x.rel<=.55&&Number.isFinite(x.wristVSm));
+  if(s.length<2)return;
+  const maxV=Math.max(percentileNum(s.map(x=>x.wristVSm),.95)*1.12,1);
+  const x0=55,y0=H-35,w=W-80,h=H-55;
+  ctx.strokeStyle="#cbd5e1";ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x0+w,y0);ctx.stroke();
+
+  const xi=x0+w*(.50/1.05);
+  ctx.strokeStyle="#94a3b8";ctx.setLineDash([5,5]);
+  ctx.beginPath();ctx.moveTo(xi,18);ctx.lineTo(xi,y0);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle="#64748b";ctx.font="14px sans-serif";ctx.fillText("打球候補",xi-28,16);
+
+  ctx.strokeStyle="#2563eb";ctx.lineWidth=3;ctx.beginPath();
+  s.forEach((p,i)=>{
+    const x=x0+w*((p.rel+.50)/1.05);
+    const y=y0-h*Math.min(1,p.wristVSm/maxV);
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  ctx.fillStyle="#1d4ed8";ctx.fillText("平滑化手首速度（固定肩幅基準）",58,16);
+
+  $("waveInfo").textContent=
+    `代表球：持続ピーク速度 ${Number.isFinite(best.peakV)?best.peakV.toFixed(2):"—"} 肩幅/秒、`+
+    `加速立ち上がり ${Number.isFinite(best.riseRate)?best.riseRate.toFixed(1):"—"}、`+
+    `ピーク位置 ${Number.isFinite(best.peakOffset)?(best.peakOffset>=0?"+":"")+best.peakOffset.toFixed(2)+"秒":"—"}、`+
+    `打球後減速 ${Number.isFinite(best.decelTime)?best.decelTime.toFixed(2)+"秒":"未検出"}、`+
+    `次球準備 ${Number.isFinite(best.readyTime)?best.readyTime.toFixed(2)+"秒":"未検出"}。`;
+
+  if($("scaleInfo")){
+    $("scaleInfo").textContent=
+      `計測基準：動画全体の安定肩幅中央値 ${Number.isFinite(dyn.fixedScale)?dyn.fixedScale.toFixed(4):"—"}。`+
+      ` 運動連鎖は立ち上がり時系列 ${Number.isFinite(dyn.chainOrder)?dyn.chainOrder+"点":"未検出"}＋球間再現性 ${Number.isFinite(dyn.chainConsistency)?dyn.chainConsistency+"点":"参考外"}から評価。`+
+      (Number.isFinite(dyn.chainGapSd)?` 連鎖時間差のロバストSD ${dyn.chainGapSd.toFixed(3)}秒。`:"");
+  }
+}
+function renderDynamics(dyn){
+  if(!dyn)return;
+  const box=(name,val,sub)=>`<div class="dyn-box"><span>${name}</span><strong>${val}</strong><small>${sub}</small></div>`;
+  $("dynamicsScores").innerHTML=
+    box("安定正規化速度",dyn.speedScore,"固定肩幅＋平滑化した持続ピーク")+
+    box("加速立ち上がり",dyn.riseScore,"平滑化速度の上昇率")+
+    box("運動連鎖",Number.isFinite(dyn.chainScore)?dyn.chainScore:"—",`立上り${Number.isFinite(dyn.chainOrder)?dyn.chainOrder:"—"}・再現性${Number.isFinite(dyn.chainConsistency)?dyn.chainConsistency:"—"}`)+
+    box("連鎖伝達効率",Number.isFinite(dyn.transferScore)?dyn.transferScore:"—",Number.isFinite(dyn.transferMedian)?`中央値 ${Math.round(dyn.transferMedian)}・下位 ${Math.round(dyn.transferLower)}`:"未検出（減点なし）")+
+    box("打球後減速",Number.isFinite(dyn.decelScore)?dyn.decelScore:"—",Number.isFinite(dyn.decelTime)?`中央値 ${dyn.decelTime.toFixed(2)}秒`:"未検出（減点なし）")+
+    box("次球準備",Number.isFinite(dyn.readyScore)?dyn.readyScore:"—",Number.isFinite(dyn.readyTime)?`中央値 ${dyn.readyTime.toFixed(2)}秒`:"未検出（減点なし）");
+  $("dynamicsCard").classList.remove("hidden");
+  drawWaveform(dyn);
+  window.__lastDynamics=dyn;
+}
+
+function competitiveMap(raw){
+  // Old rule-based subscores cluster too high.
+  // Stretch the useful range so 80-90 does not automatically mean advanced.
+  // 70->60, 80->72, 90->86, 96->94 approximately.
+  const x=clamp(raw,45,98);
+  if(x<70) return Math.round(45 + (x-45)*0.60);
+  if(x<80) return Math.round(60 + (x-70)*1.20);
+  if(x<90) return Math.round(72 + (x-80)*1.40);
+  return Math.round(86 + (x-90)*1.33);
+}
+function weakLinkPenalty(shotScores){
+  if(!shotScores.length)return 0;
+  const mins=shotScores.map(s=>Math.min(s.speedScore,s.elbowScore,s.kneeScore,s.torsoScore,s.recoveryScore));
+  const avgMin=mean(mins);
+  // Strong penalty when one element repeatedly collapses.
+  if(avgMin>=78)return 0;
+  return Math.round((78-avgMin)*0.35);
+}
+function instabilityPenalty(repScore){
+  if(repScore>=84)return 0;
+  return Math.round((84-repScore)*0.18);
+}
+
+function selectQualityCandidates(shotScores){
+  const all=[...shotScores];
+  if(!all.length)return {selected:[],excluded:[],threshold:NaN,qualityMedian:NaN,qualityQ25:NaN};
+  const withQ=all.map((s,i)=>({s,i,q:Number.isFinite(s.candidateQuality)?s.candidateQuality:35}));
+  const qs=withQ.map(x=>x.q);
+  const qMed=medianNum(qs), q25=percentileNum(qs,.25);
+  // Dynamic threshold follows recording quality but never becomes so strict that only
+  // spectacular/high-output strokes survive. It selects signal quality, not ability.
+  let threshold=clamp((Number.isFinite(qMed)?qMed:65)-12,54,72);
+  let selected=withQ.filter(x=>x.q>=threshold);
+  const minKeep=Math.min(all.length,Math.max(3,Math.ceil(all.length*.60)));
+  if(selected.length<minKeep){
+    selected=[...withQ].sort((a,b)=>b.q-a.q).slice(0,minKeep);
+    threshold=Math.min(...selected.map(x=>x.q));
+  }
+  const keep=new Set(selected.map(x=>x.i));
+  return {
+    selected:selected.sort((a,b)=>a.i-b.i).map(x=>x.s),
+    excluded:withQ.filter(x=>!keep.has(x.i)).map(x=>x.s),
+    selectedIndexes:new Set([...keep]),
+    threshold:Math.round(threshold),qualityMedian:Math.round(qMed),qualityQ25:Math.round(q25),
+    count:all.length
+  };
+}
+
+function robustTypicalAbility(shotScores){
+  // v3.9.29 PC History Guard: ordinary ability is calculated only from quality-selected candidates.
+  // The median is the center; lower-half and Q25 define the floor. The best shot has no direct weight.
+  const vals=shotScores.map(s=>s.total).filter(Number.isFinite).sort((a,b)=>a-b);
+  if(!vals.length)return {score:NaN,median:NaN,lowerMean:NaN,lowerQuartile:NaN,lowStability:NaN,count:0};
+  const med=medianNum(vals);
+  const q25=percentileNum(vals,.25);
+  const lowerHalf=vals.filter(v=>v<=med);
+  const lowerMean=mean(lowerHalf);
+  // Stability of the bottom half: a low Q25 or a wide drop from median means
+  // "good shots exist, but the usual floor is not yet high".
+  const drop=Math.max(0,med-q25);
+  const lowStability=Math.round(clamp(q25-drop*.65,35,97));
+  const score=Math.round(clamp(weightedAvailable([
+    [med,.62],[lowerMean,.20],[lowStability,.18]
+  ],med),35,97));
+  return {score,median:med,lowerMean,lowerQuartile:q25,lowStability,count:vals.length};
+}
+function evaluateEngine(shotScores){
+  const profile=activePlayer();
+  const selection=selectQualityCandidates(shotScores);
+  const all=selection.selected;
+  const dynamics=evaluateDynamics(all);
+  const fh=all.filter(s=>s.strokeKey==="forehand");
+  const bh=all.filter(s=>s.strokeKey==="backhand");
+  if(!all.length)return null;
+
+  const repAll = reproducibilityForGroup(all);
+  const repFH = reproducibilityForGroup(fh);
+  const repBH = reproducibilityForGroup(bh);
+  const reproScore=Math.round(clamp(repAll.score,45,96));
+
+  const timings=all.map(s=>({...accelerationTimingForShot(s),shot:s}));
+  const timingVals=timings.map(x=>x.score).filter(Number.isFinite);
+  const timingScore=timingVals.length?Math.round(clamp(mean(timingVals),38,97)):NaN;
+
+  const efficiencies=all.map(s=>efficiencyForShot(s)).filter(Number.isFinite);
+  const efficiencyShotMean=efficiencies.length?mean(efficiencies):NaN;
+  const outputScores=all.map(s=>measuredOutputScoreForShot(s)).filter(Number.isFinite);
+  const outputMedian=outputScores.length?medianNum(outputScores):NaN;
+  const outputLowerQ=outputScores.length?percentileNum(outputScores,.25):NaN;
+
+  const ordinary=robustTypicalAbility(all);
+
+  // v3.9.29 PC History Guard TECHNICAL LEVEL = measured output quality + kinetic-chain quality.
+  // Pose neatness is only a small supporting term. This is designed so that two
+  // players with similar-looking posture can still separate when actual output differs.
+  const measuredSpeed=dynamics?.speedScore;
+  const measuredRise=dynamics?.riseScore;
+  const measuredChain=dynamics?.chainScore;
+  const measuredDecel=dynamics?.decelScore;
+  const poseFoundation=weightedAvailable([
+    [safeAvg(all,"elbowScore"),.30],[safeAvg(all,"kneeScore"),.22],
+    [safeAvg(all,"torsoScore"),.26],[safeAvg(all,"recoveryScore"),.22]
+  ],NaN);
+  const transferScore=dynamics?.transferScore;
+  // v3.9.29 PC History Guard: measured-skill discrimination. Preserve differences in real output and
+  // proximal-to-distal transfer instead of allowing reproducibility/posture to flatten them.
+  const separationRaw=weightedAvailable([
+    [measuredSpeed,.45],[transferScore,.30],[measuredChain,.15],[measuredRise,.10]
+  ],outputMedian);
+  const separationScore=Math.round(clamp(70+(separationRaw-70)*1.35,35,97));
+  const techScore=Math.round(clamp(weightedAvailable([
+    [separationScore,.48],[outputMedian,.25],[transferScore,.14],[measuredChain,.07],[measuredRise,.04],[poseFoundation,.02]
+  ],separationScore),35,97));
+
+  // v3.9.29 PC History Guard EFFICIENCY = useful measured output divided by movement demand.
+  // Typical and lower-quartile efficiency matter, so one explosive swing cannot dominate.
+  const efficiencyLower=efficiencies.length?percentileNum(efficiencies,.25):NaN;
+  const efficiencyMedian=efficiencies.length?medianNum(efficiencies):NaN;
+  const efficiencyScore=Math.round(clamp(weightedAvailable([
+    [separationScore,.30],[transferScore,.34],[efficiencyMedian,.22],[efficiencyLower,.06],[outputMedian,.05],[measuredChain,.03]
+  ],efficiencyShotMean),35,97));
+
+  const recoveryAdj=conditionAdjustment(profile,"recovery",safeAvg(all,"recoveryScore"));
+  const lowerAdj=conditionAdjustment(profile,"lower",safeAvg(all,"kneeScore"));
+  const torsoAdj=conditionAdjustment(profile,"torso",safeAvg(all,"torsoScore"));
+
+  const avgTotal=mean(all.map(s=>s.total));
+  const best=chooseRepresentative(all.filter(s=>s.total===Math.max(...all.map(x=>x.total))),"best");
+  const worst=chooseRepresentative(all.filter(s=>s.total===Math.min(...all.map(x=>x.total))),"worst");
+  const bestDelta=best.total-avgTotal;
+  const worstDelta=worst.total-avgTotal;
+  const personalRaw=clamp(88 - Math.abs(bestDelta-worstDelta)*1.8,42,94);
+  const personalScore=Math.round(clamp(personalRaw,40,96));
+
+  const measuredExecution=Number.isFinite(dynamics?.dynamicsTotal)?dynamics.dynamicsTotal:NaN;
+
+  // v3.9.29 PC History Guard OVERALL: ordinary-ball ability is the anchor after candidate-quality filtering.
+  // Technical output and efficiency still create player-to-player separation, while
+  // one spectacular or doubtful candidate cannot define the session.
+  // v3.9.29 PC History Guard overall: skill separation is intentionally visible. Typical-ball stability
+  // still matters, but it no longer overwhelms measured output/transfer differences.
+  let overall=weightedAvailable([
+    [techScore,.31],
+    [separationScore,.20],
+    [efficiencyScore,.17],
+    [transferScore,.11],
+    [ordinary.score,.11],
+    [measuredExecution,.05],
+    [reproScore,.04],
+    [personalScore,.01]
+  ], weightedAvailable([[techScore,.34],[separationScore,.24],[efficiencyScore,.18],[transferScore,.12],[ordinary.score,.08],[reproScore,.04]],70));
+
+  overall-=Math.round(weakLinkPenalty(all)*0.12);
+  overall-=Math.round(instabilityPenalty(reproScore)*0.12);
+  overall=Math.round(clamp(overall,40,96));
+
+  return {
+    overall,techScore,reproScore,efficiencyScore,transferScore,separationScore,timingScore,personalScore,measuredExecution,dynamics,
+    ordinaryAbility:ordinary.score,ordinaryMedian:ordinary.median,lowerHalfMean:ordinary.lowerMean,
+    lowerQuartile:ordinary.lowerQuartile,lowerStability:ordinary.lowStability,
+    measuredOutputMedian:outputMedian,measuredOutputLower:outputLowerQ,
+    efficiencyMedian,efficiencyLower,
+    repAll,repFH,repBH,timings,efficiencies,
+    best,worst,avgTotal,bestDelta,worstDelta,
+    recoveryAdj,lowerAdj,torsoAdj,
+    fh,bh,profile,selection,rawShots:shotScores
+  };
+}
+function metricVarianceEvidence(group){
+  if(group.length<2)return [];
+  const defs=[
+    ["手首加速","speedScore"],["腕","elbowScore"],["下半身","kneeScore"],["体幹","torsoScore"],["戻り","recoveryScore"]
+  ];
+  return defs.map(([label,key])=>({
+    label,key,
+    min:Math.min(...group.map(s=>s[key])),
+    max:Math.max(...group.map(s=>s[key])),
+    sd:stddev(group.map(s=>s[key])),
+    avg:Math.round(mean(group.map(s=>s[key])))
+  })).sort((a,b)=>b.sd-a.sd);
+}
+function coachingByEvidence(engine){
+  const all=engine.fh.concat(engine.bh);
+  const variance=metricVarianceEvidence(all);
+  const unstable=variance[0], second=variance[1];
+  const strongest=[...variance].sort((a,b)=>b.avg-a.avg)[0];
+
+  const timingOffsets=engine.timings.map(x=>x.offset).filter(Number.isFinite);
+  const timingMean=timingOffsets.length?mean(timingOffsets):NaN;
+  const timingSd=timingOffsets.length?stddev(timingOffsets):NaN;
+
+  let observation="";
+  if(unstable){
+    observation=`${unstable.label}は ${unstable.min}〜${unstable.max}点（SD ${unstable.sd.toFixed(1)}）と球ごとの差が最も大きく、${second?second.label+"もばらつきがあります。":""}`;
+  }
+  let meaning="";
+  if(engine.reproScore<75) meaning="良い球を出す能力はありますが、同じ動作を続けて再現することが現在の主課題です。";
+  else if(engine.efficiencyScore<78) meaning="フォームは比較的そろっていますが、動作量に対して有効な加速へ変換できていない球があります。";
+  else if(engine.timingScore<78) meaning="速度そのものより、加速するタイミングを打球直前へそろえることが課題です。";
+  else meaning="フォームの再現性と加速の質は比較的高く、細かな弱点を絞って改善する段階です。";
+
+  const condition=engine.profile?.condition||"standard";
+  let conditionText="";
+  if(condition==="mobility_limited") conditionText="左右移動を強く要求せず、現在可能な範囲で準備位置と戻りの安定を優先します。";
+  if(condition==="back_pain") conditionText="腰の負担を増やす大きな体幹回旋は求めず、無理のない前傾と腕・ラケットの戻りを優先します。";
+  if(condition==="mobility_back") conditionText="左右移動と腰への負担を増やさず、上半身の準備・打点・ラケットの戻りを中心に評価します。";
+
+  let drill="";
+  if(unstable?.key==="recoveryScore") drill="1球ごとに打球後のラケットを胸の前へ戻すことだけを意識し、10〜20球。";
+  else if(unstable?.key==="torsoScore") drill="最良球を再生し、頭と体幹の位置を確認してから、同じ前傾を保つ影打ち10回×2セット。";
+  else if(unstable?.key==="kneeScore") drill="良い球の膝の使い方を確認し、無理のない範囲で同じ高さから打ち始める10〜20球。";
+  else if(unstable?.key==="elbowScore") drill="肘の開始位置を毎球そろえ、前腕の動きだけを比較する10〜20球。";
+  else drill="速く振ることより、打球直前に加速ピークが来る感覚を意識して10〜20球。";
+
+  const personal = engine.bestDelta>4
+    ? `最良球は本人平均より +${engine.bestDelta.toFixed(1)}点です。能力不足ではなく、良い動作を通常球へ再現する余地があります。`
+    : `最良球と本人平均との差は小さく、全体の底上げより細かな質の改善が中心です。`;
+
+  return {observation,meaning,conditionText,drill,personal,timingMean,timingSd,strongest,unstable};
+}
+
+function competitiveGrade(score){
+  if(score>=90)return "S：上級・競技レベル";
+  if(score>=82)return "A：かなり良い";
+  if(score>=74)return "B：中級";
+  if(score>=65)return "C：基礎はできている";
+  if(score>=55)return "D：改善余地が大きい";
+  return "E：基礎づくり";
+}
+
+
+function median(vals){
+  const a=vals.filter(Number.isFinite).slice().sort((a,b)=>a-b);
+  if(!a.length)return NaN;
+  const m=Math.floor(a.length/2);
+  return a.length%2?a[m]:(a[m-1]+a[m])/2;
+}
+function accumulatedCompetitiveLevel(currentEngine){
+  const saved=historyForPlayer().filter(x=>
+    Number.isFinite(x.engineOverall) &&
+    Number.isFinite(x.techScore) &&
+    Number.isFinite(x.reproScore) &&
+    Number.isFinite(x.efficiencyScore) &&
+    Number.isFinite(x.timingScore)
+  ).slice(-12);
+
+  // Include the current unsaved analysis provisionally so the user sees what it would do,
+  // but never call one or two sessions a firm competitive level.
+  const cur={
+    engineOverall:currentEngine.overall,
+    techScore:currentEngine.techScore,
+    reproScore:currentEngine.reproScore,
+    efficiencyScore:currentEngine.efficiencyScore,
+    timingScore:currentEngine.timingScore,
+    personalScore:currentEngine.personalScore
+  };
+  const sessions=[...saved,cur];
+  const vals=sessions.map(x=>x.engineOverall).filter(Number.isFinite);
+  const count=vals.length;
+  const med=median(vals);
+  const recent=mean(vals.slice(-Math.min(5,vals.length)));
+  const sorted=[...vals].sort((a,b)=>b-a);
+  const topN=Math.max(1,Math.ceil(sorted.length*.35));
+  const topMean=mean(sorted.slice(0,topN));
+  const sessionSD=stddev(vals);
+  const stability=Math.round(clamp(94-sessionSD*2.4,52,94));
+
+  // Multi-session level: typical performance dominates, top performance shows ceiling,
+  // stability prevents one lucky video from defining the player.
+  const dynVals=sessions.map(x=>x.dynamicsTotal).filter(Number.isFinite);
+  const dynMean=dynVals.length?mean(dynVals):med;
+  let level=Math.round(med*.34+recent*.18+topMean*.14+stability*.10+dynMean*.24);
+  if(count<3){
+    // Strong uncertainty regression: do not overclaim ability from one clip.
+    level=Math.round(level*.72 + 65*.28);
+  }
+  level=Math.round(clamp(level,45,96));
+
+  let label;
+  if(count<3) label="暫定：あと"+(3-count)+"回で蓄積評価";
+  else if(level>=90) label="上級・競技レベル";
+  else if(level>=82) label="上級寄り";
+  else if(level>=74) label="中級";
+  else if(level>=65) label="初中級";
+  else if(level>=55) label="基礎段階";
+  else label="基礎づくり";
+
+  return {level,label,count,savedCount:saved.length,median:med,recent,topMean,stability,sessionSD,provisional:count<3};
+}
+function renderAccumulatedLevel(currentEngine){
+  const c=accumulatedCompetitiveLevel(currentEngine);
+  const scoreEl=$("careerLevelScore"), labelEl=$("careerLevelLabel"), metaEl=$("careerLevelMeta"), barEl=$("careerLevelBar");
+  if(!scoreEl||!labelEl||!metaEl||!barEl){
+    console.warn("蓄積型競技レベル表示欄が見つかりません。",c);
+    window.__lastCareerLevel=c;
+    return;
+  }
+  scoreEl.textContent=c.provisional?`${c.level}（暫定）`:c.level;
+  labelEl.textContent=c.label;
+  metaEl.innerHTML=
+    `新方式セッション ${c.count}回（保存済み ${c.savedCount}回＋今回）／`+
+    `通常水準 ${Math.round(c.median)}・上限水準 ${Math.round(c.topMean)}・セッション安定 ${c.stability}`+
+    (c.provisional?`<br><strong>最低3回までは競技力を確定しません。</strong>`:"");
+  barEl.style.width=`${c.level}%`;
+  window.__lastCareerLevel=c;
+}
+
+
+function renderEngineAdviceCard(e,c){
+  const strongest=c.strongest;
+  const unstable=c.unstable;
+  const condition=e.profile?.condition||"standard";
+  const conditionMap={
+    standard:"通常評価",
+    mobility_limited:"移動制限を考慮",
+    back_pain:"腰への負担を考慮",
+    mobility_back:"移動制限＋腰への負担を考慮"
+  };
+  const strengths=[];
+  if(strongest) strengths.push(`【${strongest.label}】平均 ${strongest.avg}点で、今回の動画で最も安定した強みです。`);
+  if(e.timingScore>=82) strengths.push(`【加速タイミング】${e.timingScore}点。打球候補付近での加速のタイミングは比較的良好です。`);
+  if(e.reproScore>=82) strengths.push(`【再現性】${e.reproScore}点。同じ動画内でフォームを繰り返す安定性があります。`);
+  if(!strengths.length) strengths.push("今回は突出した高得点よりも、改善点を絞ってフォーム全体を整える段階です。");
+
+  const timingText=Number.isFinite(c.timingMean)
+    ? `加速ピークは打球候補に対して平均 ${c.timingMean>=0?"+":""}${c.timingMean.toFixed(2)}秒、ばらつき ${c.timingSd.toFixed(2)}秒です。`
+    : "加速タイミングは候補球数が少ないため参考値です。";
+
+  $("advice").innerHTML=`
+    <p><strong>今回の動画フォーム評価：${e.overall}点（${competitiveGrade(e.overall)}）</strong></p>
+    <p>これは今回の動画のフォーム品質です。競技力そのものは、下の「蓄積型競技レベル」で複数回の履歴から別に評価します。</p>
+
+    <h3>良い点</h3>
+    <ul>${strengths.map(x=>`<li>${x}</li>`).join("")}</ul>
+
+    <h3>改善ポイント</h3>
+    <ul>
+      <li>${c.observation||"球ごとのばらつきを確認します。"}</li>
+      <li>${c.meaning}</li>
+    </ul>
+
+    <h3>数値の根拠</h3>
+    <ul>
+      <li>技術水準 ${e.techScore} / 選手差判別 ${e.separationScore} / 再現性 ${e.reproScore} / 実測動作能力 ${e.dynamics?.dynamicsTotal??"—"} / 安定正規化速度 ${e.dynamics?.speedScore??"—"} / 加速立ち上がり ${e.dynamics?.riseScore??"—"} / 運動連鎖 ${e.dynamics?.chainScore??"—"} / 連鎖伝達効率 ${Number.isFinite(e.transferScore)?e.transferScore:"—"} / 打球後減速 ${e.dynamics?.decelScore??"—"} / 次球準備 ${e.dynamics?.readyScore??"—"}</li>
+      <li>${timingText}</li>
+      <li>${c.personal}</li>
+    </ul>
+
+    <h3>次回の練習メニュー</h3>
+    <ol>
+      <li>${c.drill}</li>
+      <li>${unstable?`${unstable.label}のばらつき（現在SD ${unstable.sd.toFixed(1)}）を小さくできるか確認してください。`:"同じフォームを10〜20球繰り返して再現性を確認してください。"}</li>
+    </ol>
+
+    <h3>身体条件への配慮</h3>
+    <p>${conditionMap[condition]||"通常評価"}。${c.conditionText||"特別な補正は行っていません。"}</p>
+
+    <p class="muted">※旧v3.6方式の90点などは、このAIアドバイスには使用していません。ボール接触・回転量・コース精度そのものはまだ直接測定していません。</p>
+  `;
+  $("adviceCard").classList.remove("hidden");
+}
+
+function renderEngineEvaluation(shotScores){
+  const e=evaluateEngine(shotScores);
+  if(!e)return;
+  const c=coachingByEvidence(e);
+  const metric=(name,value,why)=>`<div class="engine-metric"><span>${name}</span><strong>${value}</strong><small>/100</small><div class="why">${why}</div></div>`;
+  $("engineScores").innerHTML=
+    metric("技術水準",e.techScore,"実測出力・加速・運動連鎖を中心に評価")+
+    metric("選手差判別指数",e.separationScore,"実測速度・連鎖伝達を強く反映し、選手間の差を圧縮しない")+
+    metric("再現性",e.reproScore,"同じ動画内のばらつきを評価")+
+    metric("動作効率",e.efficiencyScore,"実測出力÷動作コスト＋伝達効率")+
+    metric("連鎖伝達効率",Number.isFinite(e.transferScore)?e.transferScore:"—","下半身・体幹側の動きを手首出力へ変換")+
+    metric("通常球能力",e.ordinaryAbility,"品質選別後の中央値＋下位球安定")+
+    metric("通常球中央値",Math.round(e.ordinaryMedian),"採用候補の中央の実力")+
+    metric("候補品質",e.selection?.qualityMedian??"—",`採用 ${e.selection?.selected.length??0}/${e.selection?.count??0}球・基準 ${e.selection?.threshold??"—"}`)+
+    metric("下位球安定",e.lowerStability,"下位25%と中央値の落差を評価")+
+    metric("加速タイミング",e.timingScore,"速度ピークが打球直前か")+
+    metric("個人内安定",e.personalScore,"最良球と通常球の差");
+
+  const condName={
+    standard:"通常評価",
+    mobility_limited:"移動制限を考慮",
+    back_pain:"腰への負担を考慮",
+    mobility_back:"移動制限＋腰への負担を考慮"
+  }[e.profile?.condition||"standard"];
+
+  $("engineAdvice").innerHTML=`
+    <h3>個別コーチング評価 <span class="score-band">v3.9.29 PC History Guard動画フォーム評価 ${e.overall}点</span></h3>
+    <p class="muted">旧方式の総合点は最終評価には使用していません。骨格の基礎指標としてのみ内部参照します。</p>
+    <div class="evidence-grid">
+      <div class="evidence-item"><strong>① 観察</strong><br>${c.observation}</div>
+      <div class="evidence-item"><strong>② 数値根拠</strong><br>
+        再現性 ${e.reproScore}点。フォア内ばらつき指標 ${competitiveMap(e.repFH.score)}点 / バック ${competitiveMap(e.repBH.score)}点。<br>
+        候補品質は中央値 ${e.selection?.qualityMedian??"—"}点、${e.selection?.selected.length??0}/${e.selection?.count??0}球を通常球評価に採用。<br>
+        ${Number.isFinite(c.timingMean)?`加速ピーク平均 ${c.timingMean>=0?"+":""}${c.timingMean.toFixed(2)}秒、ばらつき ${c.timingSd.toFixed(2)}秒。`:"加速タイミングは暫定評価。"}
+      </div>
+      <div class="evidence-item"><strong>③ 意味</strong><br>${c.meaning}<br>${c.personal}</div>
+      <div class="evidence-item"><strong>④ 次の練習</strong><br>${c.drill}</div>
+    </div>
+    <div class="reference-note"><strong>⑤ 次回確認：</strong>
+      ${c.unstable?`${c.unstable.label}のSDを ${c.unstable.sd.toFixed(1)} より小さくできるか確認します。`:"同じフォームの再現性を確認します。"}
+      ${c.strongest?` 強みは ${c.strongest.label}（平均${c.strongest.avg}点）です。`:""}
+    </div>
+    <div class="profile-condition"><strong>身体条件：</strong>${condName}。${c.conditionText||"特別な補正は行っていません。"}</div>
+  `;
+  $("engineCard").classList.remove("hidden");
+  renderEngineAdviceCard(e,c);
+  // v3.8.1: main display and AI advice now both use the same new video-form evaluation.
+  $("totalScore").textContent=e.overall;
+  $("grade").textContent=`今回の動画：${competitiveGrade(e.overall)}`;
+  renderAccumulatedLevel(e);
+  if(e.dynamics)renderDynamics(e.dynamics);
+  $("summary").textContent=`v3.9.29 PC History Guard動画フォーム評価：技術 ${e.techScore}・選手差判別 ${e.separationScore}・再現性 ${e.reproScore}・効率 ${e.efficiencyScore}・連鎖伝達 ${Number.isFinite(e.transferScore)?e.transferScore:"—"}・通常球 ${e.ordinaryAbility}（中央値 ${Math.round(e.ordinaryMedian)} / 下位安定 ${e.lowerStability}）・候補品質 ${e.selection?.qualityMedian??"—"}（採用 ${e.selection?.selected.length??0}/${e.selection?.count??0}球）・加速タイミング ${e.timingScore}・個人内安定 ${e.personalScore}。`;
+  window.__lastEngine=e;
+  // Rebuild pending history entry after the competitive score is finalized.
+  if(window.__legacyEvaluation && window.__lastShotScores){
+    lastAnalysisSummary=buildHistoryEntry(window.__legacyEvaluation,window.__lastShotScores);
+    lastAnalysisSummary.overall=e.overall;
+    lastAnalysisSummary.legacyOverall=window.__legacyEvaluation.total;
+  }
+}
+
+function renderBestWorst(shotScores){
+  if(!shotScores.length)return;
+  const selection=selectQualityCandidates(shotScores);
+  const evaluated=selection.selected.length?selection.selected:shotScores;
+
+  const bestScore=Math.max(...evaluated.map(s=>s.total));
+  const worstScore=Math.min(...evaluated.map(s=>s.total));
+
+  const bestGroup=evaluated.filter(s=>s.total===bestScore);
+  const worstGroup=evaluated.filter(s=>s.total===worstScore);
+
+  const best=chooseRepresentative(bestGroup,"best");
+  const worst=chooseRepresentative(worstGroup,"worst");
+
+  const metricList=[
+    ['手首加速','speedScore'],['腕','elbowScore'],['下半身','kneeScore'],['体幹','torsoScore'],['戻り','recoveryScore']
+  ];
+  const diffs=metricList.map(([label,key])=>({label,key,d:best[key]-worst[key],best:best[key],worst:worst[key]})).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d));
+  const biggest=diffs[0];
+
+  const groups={forehand:[],backhand:[],unknown:[]};
+  shotScores.forEach(s=>(groups[s.strokeKey]||groups.unknown).push(s));
+  const avgGroup=a=>a.length?Math.round(mean(a.map(x=>x.total))):null;
+  const fhAvg=avgGroup(groups.forehand), bhAvg=avgGroup(groups.backhand);
+
+  const strokeBadge=s=>`<span class="stroke-badge ${s.strokeKey==='forehand'?'fh':s.strokeKey==='backhand'?'bh':''}">${s.strokeType} ${s.strokeConfidence}%</span>`;
+  const profileBadge=s=>`<span class="profile-badge ${s.scoreProfileBadge}">${s.scoreProfileLabel}</span>`;
+  const timesText = arr => arr.map(x=>`${x.t.toFixed(2)}秒`).join(" / ");
+
+  $("bestWorst").innerHTML=`
+    <div class="bwcard best">
+      <h3>🏆 最良の1球 ${strokeBadge(best)} ${profileBadge(best)} ${bestGroup.length>1?`<span class="tiebadge">同点 ${bestGroup.length}球</span>`:''}</h3>
+      <div class="bigshot">${best.t.toFixed(2)}秒</div>
+      <div class="shot-score">${best.total}点</div>
+      <p>${shotReason(best,true)}</p>
+      <button onclick="window.seekShot(${best.t})">この1球を再生</button>
+      ${bestGroup.length>1?`<div class="group-note">同点最良球は <strong>${timesText(bestGroup)}</strong> です。代表球は、体幹安定・戻り・腕の使い方を優先して選んでいます。</div>`:''}
+    </div>
+    <div class="bwcard worst">
+      <h3>🔧 改善すべき1球 ${strokeBadge(worst)} ${profileBadge(worst)} ${worstGroup.length>1?`<span class="tiebadge">同点 ${worstGroup.length}球</span>`:''}</h3>
+      <div class="bigshot">${worst.t.toFixed(2)}秒</div>
+      <div class="shot-score">${worst.total}点</div>
+      <p>${shotReason(worst,false)}</p>
+      <button onclick="window.seekShot(${worst.t})">この1球を再生</button>
+      ${worstGroup.length>1?`<div class="group-note">同点改善球は <strong>${timesText(worstGroup)}</strong> です。代表球は、最も安定性の低い球を優先して選んでいます。</div>`:''}
+    </div>`;
+
+  $("shotCoach").innerHTML=`
+    <h3>フォア・バック自動判別（推定）</h3>
+    <p>フォア推定 <strong>${groups.forehand.length}球</strong>${fhAvg!==null?`・平均 ${fhAvg}点`:''} ／ バック推定 <strong>${groups.backhand.length}球</strong>${bhAvg!==null?`・平均 ${bhAvg}点`:''}</p>
+    <p class="muted">v3.3.2では、候補抽出の段階から手首速度・肘角度変化・身体中央付近の動きを組み合わせ、その後に打球前後の手首軌道・身体中心線への近さ・肘と手首の位置関係で分類しています。ラケットやボールを認識しているわけではないため、完全ではありません。</p>
+    <div class="quality-summary"><strong>候補品質選別：</strong>${selection.selected.length}/${selection.count}球を通常球評価・最良/改善球の対象に採用（品質中央値 ${selection.qualityMedian}、採用基準 ${selection.threshold}）。参考外候補は1球カードには残します。</div>
+    <div class="mode-note"><strong>種目別の見方：</strong>${modeSpecificCoaching(evaluated)}</div>
+
+    <h3>最良球と改善球の差</h3>
+    <div class="compare-grid">${diffs.map(x=>`<div class="compare-item"><strong>${x.label}</strong><br>最良 ${x.best} → 改善 ${x.worst}<br><span class="${x.d>=0?'delta-up':'delta-down'}">差 ${x.d>=0?'+':''}${x.d}点</span></div>`).join('')}</div>
+    <p><strong>最も大きな差：</strong>${biggest.label}で <strong>${Math.abs(biggest.d)}点</strong> の差があります。${biggest.d>0?'改善球ではこの項目を最優先にすると、最良球のフォームへ近づきやすいです。':'この項目は改善球の方が良いため、他の低い項目を優先してください。'}</p>
+    <p><strong>改善球への具体的アドバイス：</strong>${shotAdvice(worst)}</p>
+    <p><strong>次の練習：</strong>最良球と改善球を続けて再生し、まず「${biggest.label}」だけを比較してください。その後、その1点だけ意識して10〜20球打つのがおすすめです。</p>
+    <p><strong>球種別練習：</strong>下の「フォア・バック別ベスト／ワースト」で、フォアとバックを別々に練習課題として確認できます。</p>
+  `;
+  $("bestWorstCard").classList.remove('hidden');
+}
+
+function adviceHTML(e){
+  const mode=$("mode").options[$("mode").selectedIndex].text;
+  const modeKey=getModeKey();
+  const scoreMap = {
+    ready: ["構え", e.ready],
+    lower: ["下半身", e.lower],
+    arm: ["腕・前腕", e.arm],
+    torso: ["体幹", e.torso],
+    rhythm: ["リズム", e.rhythm],
+    recovery: ["リカバリー", e.recovery],
+  };
+  const entries = Object.entries(scoreMap).sort((a,b)=>a[1][1]-b[1][1]);
+  const weak = entries.slice(0,2);
+  const strong = entries.filter(x=>x[1][1] >= 82).slice(0,3);
+
+  const strengths = [];
+  const fixes = [];
+  const drills = [];
+  const metricNotes = [];
+
+  strong.forEach(([key, [label]]) => {
+    const map = {
+      ready: "構えが比較的安定しており、次の動作へつながりやすいです。",
+      lower: "下半身がしっかり使えており、打球時の土台ができています。",
+      arm: "腕・前腕の使い方にメリハリがあり、スイングに動きがあります。",
+      torso: "体幹の使い方が安定しており、フォームの軸が保てています。",
+      rhythm: "スイングのテンポが良く、動作の流れが自然です。",
+      recovery: "打球後の戻りが比較的速く、次球への準備がしやすいです。"
+    };
+    strengths.push(`【${label}】${map[key]}`);
+  });
+
+  if (Number.isFinite(e.avgKnee)) {
+    if (e.avgKnee < 115) metricNotes.push(`平均膝角 ${e.avgKnee.toFixed(0)}°：かなり低い姿勢です。安定感はありますが、下がりすぎると動き出しが遅くなることがあります。`);
+    else if (e.avgKnee <= 140) metricNotes.push(`平均膝角 ${e.avgKnee.toFixed(0)}°：比較的低い構えができています。卓球らしい準備姿勢に近いです。`);
+    else metricNotes.push(`平均膝角 ${e.avgKnee.toFixed(0)}°：やや高めの姿勢です。もう少し膝を柔らかく使うと反応が速くなります。`);
+  }
+  if (Number.isFinite(e.avgTorso)) {
+    if (e.avgTorso < 5) metricNotes.push(`体幹傾斜 ${e.avgTorso.toFixed(1)}°：上体がかなり起きています。少し前傾すると前で打ちやすくなります。`);
+    else if (e.avgTorso <= 18) metricNotes.push(`体幹傾斜 ${e.avgTorso.toFixed(1)}°：前傾はおおむね適度です。`);
+    else metricNotes.push(`体幹傾斜 ${e.avgTorso.toFixed(1)}°：前傾がやや大きめです。前に倒れすぎないよう軸を保つと安定します。`);
+  }
+  if (Number.isFinite(e.elbowRange)) {
+    if (e.elbowRange < 55) metricNotes.push(`肘可動域 ${e.elbowRange.toFixed(0)}°：腕の動きがやや小さめです。前腕の加速をもう少し使うと打球に伸びが出ます。`);
+    else if (e.elbowRange <= 105) metricNotes.push(`肘可動域 ${e.elbowRange.toFixed(0)}°：腕の使い方は良好です。`);
+    else metricNotes.push(`肘可動域 ${e.elbowRange.toFixed(0)}°：腕の動きは大きいですが、振りすぎていないかも確認するとよいです。`);
+  }
+
+  weak.forEach(([key,[label]]) => {
+    const commonFix = {
+      ready: `【${label}】構えでは、膝を軽く曲げたまま上体を少し前へ置き、打つ前から動ける姿勢を作りましょう。`,
+      lower: `【${label}】打つ瞬間に「軽く沈む → 打つ → 戻る」の流れを作ると、球威と安定性が上がりやすいです。`,
+      arm: `【${label}】腕だけで押さず、肘を体の前に残しながら前腕を前方向へ加速させる感覚を意識してください。`,
+      torso: `【${label}】体幹を少し前傾させ、腰から上だけで振らず、下半身から上半身へ力を伝える意識を持つと良いです。`,
+      rhythm: `【${label}】打つ前の準備から打球後の戻りまでのテンポを一定にすると、連続球の再現性が高まります。`,
+      recovery: `【${label}】打球後はラケットと重心を早めに中央へ戻し、次球の準備姿勢に素早く入る練習が有効です。`,
+    };
+    const foreFix = {
+      arm: `【${label}】フォアでは肘を引きすぎず、腰と肩の回転に合わせて前腕が自然に前へ出る形を作りましょう。`,
+      torso: `【${label}】フォアでは体幹回旋が不足すると腕打ちになりやすいです。腰→肩→腕の順で動くかを確認しましょう。`,
+      lower: `【${label}】フォアでは右脚（右利きの場合）から左脚へ軽く乗る感覚を入れると球威が上がりやすいです。`,
+    };
+    const backFix = {
+      arm: `【${label}】バックでは肘を身体の前に保ち、前腕が小さく鋭く動く形を作りましょう。`,
+      recovery: `【${label}】バックでは戻りの速さが重要です。打球後にラケットをすぐ胸の前へ戻してください。`,
+      torso: `【${label}】バックでは上体が起きやすいので、少し前傾したまま打点を前で取る意識が有効です。`,
+    };
+    let msg = commonFix[key];
+    if(modeKey==="forehand" && foreFix[key]) msg = foreFix[key];
+    if(modeKey==="backhand" && backFix[key]) msg = backFix[key];
+    fixes.push(msg);
+
+    const commonDrill = {
+      ready: "影打ち10回×3セット：毎回、構えを作ってからスタートし、最初の一歩を素早く出す練習。",
+      lower: "多球または素振り15回×3セット：膝を軽く使って『沈む → 打つ → 戻る』を繰り返す。",
+      arm: "影打ち10回×3セット：前腕を使ってコンパクトに前へ振る練習。",
+      torso: "鏡または動画確認で10回×3セット：少し前傾した姿勢を保ったままスイングする。",
+      rhythm: "2点フットワークで30秒×3本：一定テンポで準備 → 打球 → 戻りを続ける。",
+      recovery: "1球ごとにホームポジションへ戻る練習を20球×2セット。"
+    };
+    const foreDrill = {
+      arm: "フォアの影打ち10回×3セット：腰→肩→腕の順に回して、最後に前腕が出る形を確認する。",
+      lower: "フォアの重心移動練習10回×3セット：右足から左足へ軽く乗りながら打つ。",
+      torso: "フォアの回旋確認10回×3セット：前傾を保ったまま腰と肩を一緒に回す。"
+    };
+    const backDrill = {
+      arm: "バックの影打ち10回×3セット：肘を胸の前に置き、前腕を小さく速く出す。",
+      recovery: "バック連打20球×2セット：1球ごとにラケットを胸の前へ戻す意識で行う。",
+      torso: "バックの前傾維持練習10回×3セット：前傾を保ち、打点を身体の前に置く。"
+    };
+    let drill = commonDrill[key];
+    if(modeKey==="forehand" && foreDrill[key]) drill = foreDrill[key];
+    if(modeKey==="backhand" && backDrill[key]) drill = backDrill[key];
+    drills.push(drill);
+  });
+
+  const modeSpecific = {
+    overall:"総合モードでは、構え・下半身・腕・体幹・リズム・戻りをバランスよく整えるのが目標です。",
+    forehand:"フォアモードでは、下半身の押し出し、体幹回旋、そして前方向への加速を重視しています。特に『腰→肩→腕』の順に力が伝わるかを意識すると良いです。",
+    backhand:"バックモードでは、肘を身体の前に保つこと、前腕の加速、打球後の戻りの速さを重視しています。大きく振りすぎず、コンパクトに前へ出す感覚が大切です."
+  };
+
+  return `
+  <p><strong>${mode}の総合アドバイス</strong></p>
+  <p>今回の総合スコアは <strong>${e.total}点</strong>（${grade(e.total)}）です。数値上は全体として良好ですが、弱い2項目を重点的に直すと一段上がりやすい状態です。</p>
+
+  <h3>良い点</h3>
+  <ul>${(strengths.length ? strengths : ["大きな崩れは少なく、全体として安定したフォームです。"]).map(x=>`<li>${x}</li>`).join("")}</ul>
+
+  <h3>改善ポイント</h3>
+  <ul>${fixes.map(x=>`<li>${x}</li>`).join("")}</ul>
+
+  <h3>数値の読み取り</h3>
+  <ul>${metricNotes.map(x=>`<li>${x}</li>`).join("")}</ul>
+
+  <h3>次回の練習メニュー</h3>
+  <ol>${drills.map(x=>`<li>${x}</li>`).join("")}</ol>
+
+  <h3>種目別コメント</h3>
+  <p>${modeSpecific[modeKey] || modeSpecific.overall}</p>
+
+  <p class="muted">※これはコーチング補助用のルールベース評価です。体格・撮影角度・戦型によって適正値は変わります。特に体幹傾斜はカメラ角度の影響を受けやすいので、横方向から撮った動画もあると精度が上がります。</p>
+  `;
+}
+function fmtNum(v,d=0,suffix=""){
+  return Number.isFinite(v)?`${v.toFixed(d)}${suffix}`:"—";
+}
+function renderEvaluation(e){
+  // Legacy v3.6-style score is kept only as an internal reference.
+  // The visible main score is written later by renderEngineEvaluation().
+  window.__legacyEvaluation=e;
+  $("totalScore").textContent="解析中";
+  $("grade").textContent="v3.9.29 PC History Guard動画フォーム評価を計算中…";
+  const lowerCount=analysisData.filter(d=>d.lowerBodyVisible).length;
+  const lowerNote=lowerCount < Math.max(3,analysisData.length*.35) ? " ※脚の検出が少ないため下半身は参考値" : "";
+  $("summary").textContent=`骨格解析完了：${e.peakCount}回の打球候補を検出。v3.9.29 PC History Guard動画フォーム評価を計算中です。平均膝角 ${fmtNum(e.avgKnee,0,"°")}、体幹傾斜 ${fmtNum(e.avgTorso,1,"°")}、肘可動域 ${fmtNum(e.elbowRange,0,"°")}。${lowerNote}`;
+
+  const items=[["構え",e.ready],["下半身",e.lower],["腕・前腕",e.arm],["体幹",e.torso],["リズム",e.rhythm],["リカバリー",e.recovery]];
+  $("metrics").innerHTML=items.map(([n,v])=>`<div class="metric"><strong>${v}</strong><small>${n} / 100${n==="下半身"&&lowerNote?"（参考）":""}</small></div>`).join("")+
+    `<div class="metric"><strong>${fmtNum(e.avgKnee,0,"°")}</strong><small>平均膝角</small></div><div class="metric"><strong>${fmtNum(e.elbowRange,0,"°")}</strong><small>肘可動域</small></div>`;
+
+  $("metricsCard").classList.remove("hidden"); $("adviceCard").classList.remove("hidden"); $("dataCard").classList.remove("hidden");
+  $("advice").innerHTML=adviceHTML(e);
+  $("rows").innerHTML=analysisData.filter((_,i)=>i%Math.max(1,Math.round(1/(parseFloat($("quality").value)*3)))===0).slice(0,120)
+    .map(d=>`<tr><td>${d.t.toFixed(2)}</td><td>${fmtNum(d.elbow,0,"°")}</td><td>${fmtNum(d.leftKnee,0,"°")}</td><td>${fmtNum(d.rightKnee,0,"°")}</td><td>${fmtNum(d.torso,1,"°")}</td><td>${d.wristSpeed.toFixed(2)}</td></tr>`).join("");
+}
+async function renderShots(peaks){
+  shots=[]; $("shots").innerHTML="";
+  const baseData=shotAnalysisData.length?shotAnalysisData:analysisData;
+  const shotScores=[];
+  for(let i=0;i<peaks.length;i++){
+    status.textContent=`v3.9.29 PC History Guard 評価計算中… 候補 ${i+1}/${peaks.length}`;
+    shotScores.push(scoreShot(peaks[i],baseData));
+    // Yield to the browser after every candidate so the UI never looks frozen.
+    await new Promise(r=>setTimeout(r,0));
+  }
+  window.__lastShotScores=shotScores;
+  const selection=selectQualityCandidates(shotScores);
+  window.__lastCandidateSelection=selection;
+  renderBestWorst(shotScores);
+  renderEngineEvaluation(shotScores);
+  renderStrokeGrowth(selection.selected.length?selection.selected:shotScores);
+
+  for(let i=0;i<peaks.length;i++){
+    status.textContent=`候補画像を作成中… ${i+1}/${peaks.length}`;
+    const p=peaks[i], sc=shotScores[i];
+    await waitSeek(p.t);
+    const lm=p.lm;
+    const img=captureFrame(lm);
+    shots.push({...sc,img});
+  }
+
+  const selectedShots=shots.filter((s,i)=>selection.selectedIndexes.has(i));
+  const bestScore=selectedShots.length?Math.max(...selectedShots.map(s=>s.total)):Math.max(...shots.map(s=>s.total));
+  const worstScore=selectedShots.length?Math.min(...selectedShots.map(s=>s.total)):Math.min(...shots.map(s=>s.total));
+
+  $("shots").innerHTML=shots.map((s,i)=>{
+    const kept=selection.selectedIndexes.has(i);
+    const cls=!kept?"reference":(s.total===bestScore?"good":(s.total===worstScore?"needs":""));
+    const bestCount=selectedShots.filter(x=>x.total===bestScore).length;
+    const worstCount=selectedShots.filter(x=>x.total===worstScore).length;
+    const tag=!kept?"参考外":(s.total===bestScore?(bestCount>1?"🏆 最良タイ":"🏆 最良"):(s.total===worstScore?(worstCount>1?"🔧 改善タイ":"🔧 改善"):""));
+    return `<div class="shot ${cls}">
+      <img src="${s.img}">
+      <h4>候補 ${i+1} — ${s.t.toFixed(2)}秒 ${tag} <span class="stroke-badge ${s.strokeKey==='forehand'?'fh':s.strokeKey==='backhand'?'bh':''}">${s.strokeType}</span> <span class="profile-badge ${s.scoreProfileBadge}">${s.scoreProfileLabel}</span> <span class="quality-badge ${kept?'keep':'ref'}">候補品質 ${fmtNum(s.candidateQuality)}・${kept?'採用':'参考外'}</span></h4>
+      <div class="shot-score">${s.total}点</div>
+      <div class="shot-detail">
+        <div>手首加速<br><strong>${s.speedScore}</strong></div>
+        <div>腕<br><strong>${s.elbowScore}</strong></div>
+        <div>下半身<br><strong>${s.kneeScore}</strong></div>
+        <div>体幹<br><strong>${s.torsoScore}</strong></div>
+        <div>戻り<br><strong>${s.recoveryScore}</strong></div>
+        <div>加速タイミング<br><strong>${s.timingScore}</strong></div>
+        <div>安定速度<br><strong>${fmtNum(s.speedDynScore)}</strong></div>
+        <div>加速立上り<br><strong>${fmtNum(s.riseDynScore)}</strong></div>
+        <div>動作効率<br><strong>${s.efficiencyShotScore}</strong></div><div>伝達効率<br><strong>${fmtNum(s.transferScore)}</strong></div><div>動作能力<br><strong>${fmtNum(s.dynamicsTotal)}</strong></div><div>連鎖立上り<br><strong>${fmtNum(s.chainDynScore)}</strong></div><div>打球後減速<br><strong>${fmtNum(s.decelDynScore)}</strong></div><div>次球準備<br><strong>${fmtNum(s.readyDynScore)}</strong></div>
+        <div>肘角<br><strong>${s.elbow.toFixed(0)}°</strong></div>
+        <div>候補品質<br><strong>${fmtNum(s.candidateQuality)}</strong></div>
+        <div>判定信頼度<br><strong>${s.strokeConfidence}%</strong></div>
+        <div>判定根拠<br><strong>${s.strokeKey==='backhand'?'中心寄り軌道':s.strokeKey==='forehand'?'外側軌道':'不明'}</strong></div>
+      </div>
+      <p>${shotAdvice(s)}</p><div class="shot-new-note">※この1球の総合点はv3.9.29 PC History Guard方式。候補品質は「打球らしい波形の明瞭さ」を測り、能力点そのものには直接加点しません。${kept?'通常球評価に採用':'候補品質が相対的に低いため通常球評価から参考外'}。未検出項目は減点しません。連鎖伝達効率は実測した近位部から手首への速度増幅と立ち上がり順序を合わせて評価します。</div>
+      <button onclick="window.seekShot(${s.t})">この位置を再生</button>
+    </div>`;
+  }).join("");
+  $("shotsCard").classList.remove("hidden");
+}
+window.seekShot = function(t){
+  if(!video.src) return;
+
+  // Move to the detected swing candidate and start playback.
+  // This function is called directly by the user's button click, which helps
+  // browsers allow play() without treating it as unwanted autoplay.
+  try{
+    video.pause();
+    video.currentTime = Math.min(Math.max(Number(t) || 0, 0), Math.max(0, video.duration - 0.01));
+
+    // Bring the video into view so the result of the button press is obvious.
+    const wrap = document.querySelector(".video-wrap");
+    if(wrap){
+      wrap.scrollIntoView({behavior:"smooth", block:"center"});
+    }
+
+    const playPromise = video.play();
+    if(playPromise && typeof playPromise.catch === "function"){
+      playPromise.catch(err => {
+        console.warn("Playback could not start automatically:", err);
+        status.textContent = `候補位置 ${video.currentTime.toFixed(2)}秒へ移動しました。再生ボタン ▶ を押してください。`;
+      });
+    }
+    status.textContent = `候補位置 ${video.currentTime.toFixed(2)}秒から再生します。`;
+  }catch(err){
+    console.error(err);
+    status.textContent = "候補位置への移動に失敗しました：" + err.message;
+  }
+};
+
+analyzeBtn.onclick=async()=>{
+  if(!pose||!video.src)return;
+  const runId=++analysisRunId;
+  const runPlayerId=activePlayerId();
+  const ensureCurrent=()=>{
+    if(runId!==analysisRunId || runPlayerId!==activePlayerId()){
+      throw new Error("__CANCELLED__");
+    }
+  };
+  try{
+    ensureCurrent();
+    live=false; if(raf)cancelAnimationFrame(raf); liveBtn.textContent='骨格表示 ON';
+    video.pause(); analyzeBtn.disabled=true; bar.style.width='1%';
+
+    // Release the previous run's thumbnails/canvases before allocating new ones.
+    await releaseTransientAnalysisMemory();
+    ensureCurrent();
+    const baseStep=parseFloat($('quality').value), dur=video.duration;
+    const coarseStep=Math.max(.22,baseStep*2.4);
+    const fineStep=Math.max(.055,baseStep*.52);
+
+    status.textContent=`高速スキャン中…（約 ${coarseStep.toFixed(2)}秒間隔）`;
+    let prev=null, idx=0;
+    for(let t=.02;t<dur;t+=coarseStep){
+      await waitSeek(t);
+      ensureCurrent();
+      const res=pose.detectForVideo(video,nextMpTimestamp(Math.max(1,Math.round(coarseStep*1000))));
+      const lm=res.landmarks?.[0];
+      if(lm && corePoseOK(lm)){
+        const f=calcFrame(lm,t,prev);analysisData.push(f);prev=f;
+      }
+      idx++; bar.style.width=(Math.min(58,t/dur*58))+'%';
+      if(idx%(mobileLightMode.checked?4:10)===0) await new Promise(r=>setTimeout(r,mobileLightMode.checked?12:0));
+    }
+    if(analysisData.length<4)throw new Error('人物の骨格を十分に検出できませんでした。上半身（肩・肘・手首・腰）が見える動画を使ってください。');
+    const partialLowerCount=analysisData.filter(d=>d.lowerBodyVisible).length;
+
+    let coarsePeaks=detectStrokeCandidates(analysisData,10);
+    if(!coarsePeaks.length) coarsePeaks=findPeaks(analysisData,8,.55,.42);
+    const intervals=mergeIntervals(coarsePeaks,dur);
+
+    status.textContent=`候補 ${coarsePeaks.length}か所を精密解析中…（${intervals.length}区間）`;
+    let doneSpan=0, totalSpan=intervals.reduce((s,x)=>s+(x.b-x.a),0)||1;
+    for(const it of intervals){
+      let localPrev=null;
+      for(let t=it.a;t<=it.b;t+=fineStep){
+        await waitSeek(t);
+        ensureCurrent();
+        const res=pose.detectForVideo(video,nextMpTimestamp(Math.max(1,Math.round(fineStep*1000))));
+        const lm=res.landmarks?.[0];
+        if(lm && corePoseOK(lm)){
+          const f=calcFrame(lm,t,localPrev);shotAnalysisData.push(f);localPrev=f;
+        }
+        const localDone=doneSpan+(t-it.a);
+        bar.style.width=(58+Math.min(37,localDone/totalSpan*37))+'%';
+      }
+      doneSpan+=it.b-it.a;
+      await new Promise(r=>setTimeout(r,mobileLightMode.checked?16:0));
+    }
+
+    shotAnalysisData=shotAnalysisData.sort((a,b)=>a.t-b.t).filter((d,i,a)=>i===0||d.t-a[i-1].t>.025);
+    const fineBase=shotAnalysisData.length?shotAnalysisData:analysisData;
+    let peaks=detectStrokeCandidates(fineBase,8);
+    if(peaks.length<Math.min(4,coarsePeaks.length)) peaks=coarsePeaks.slice(0,8);
+
+    ensureCurrent();
+    const e=evaluate(analysisData,peaks); renderEvaluation(e);
+    status.textContent=`骨格解析完了：${peaks.length}球の候補を検出。v3.9.29 PC History Guard評価を順番に計算します…`;
+    ensureCurrent();
+    await new Promise(r=>setTimeout(r,0));
+    await renderShots(peaks);
+    ensureCurrent();
+    if(window.__lastEngine){
+      lastAnalysisSummary=buildHistoryEntry(e,window.__lastShotScores||[]);
+      lastAnalysisSummary.overall=window.__lastEngine.overall;
+      lastAnalysisSummary.legacyOverall=e.total;
+      saveHistoryBtn.disabled=false;
+      shareCurrentBtn.disabled=false;
+      const oldHist=historyForPlayer ? historyForPlayer() : loadHistory();
+      if(oldHist.length) $("previousCompare").innerHTML=compareEntries(lastAnalysisSummary,oldHist[oldHist.length-1]);
+    }
+    bar.style.width='100%';
+    status.innerHTML=`${activePlayer().name} のAI分析が完了しました。フォア／バック別の最良・改善球と、v3.8動画評価・蓄積競技レベルエンジンの根拠付きアドバイスを表示しました。<span class="fast-note">2段階高速解析・部分骨格対応</span>`;
+    analyzeBtn.disabled=false;
+  }catch(e){
+    if(e && e.message==="__CANCELLED__"){
+      console.log("Analysis cancelled because player/video session changed.");
+      return;
+    }
+    console.error(e);
+    status.textContent='解析エラー：'+e.message;
+    bar.style.width='0';
+    analyzeBtn.disabled=!video.src;
+  }
+};
+
+saveHistoryBtn.onclick=()=>{
+  if(!lastAnalysisSummary)return;
+  const p=activePlayer(),h=loadHistory();
+  const base={...lastAnalysisSummary,id:Date.now(),savedAt:new Date().toISOString(),playerId:p.id,playerName:p.name,overall:(window.__lastEngine?.overall??lastAnalysisSummary.overall),legacyOverall:(window.__legacyEvaluation?.total??lastAnalysisSummary.legacyOverall)};
+  const item=makeCartePayload(base);
+  h.push(item);saveHistoryStore(h);lastAnalysisSummary=item;
+  status.textContent=`${p.name} の今回の分析を「分析カルテ」として保存しました。履歴の「呼び出す」から再表示できます。`;
+  renderHistoryUI();openCarte(item.id);
+};
+exportHistoryBtn.onclick=async()=>{
+  const p=activePlayer(),rows=historyForPlayer();
+  if(!rows.length)return alert("書き出す履歴がありません。");
+  try{
+    await exportJsonSafe(rows,`table-tennis-history-${safeFileName(p.name)}.json`);
+  }catch(e){
+    console.error(e);
+    alert("履歴JSONの書き出しに失敗しました。");
+  }
+};
+exportCsvBtn.onclick=async()=>{
+  const p=activePlayer(),rows=historyForPlayer();
+  const head=["保存日時","選手","動画","動画評価","蓄積競技レベル","技術水準","再現性","動作効率","連鎖伝達効率","通常球能力","通常球中央値","下位球安定","加速タイミング","個人内安定","フォア平均","バック平均","重点課題"];
+  const body=rows.map(x=>[x.savedAt,x.playerName,x.videoName,x.overall,x.careerLevel,x.engine?.techScore??x.techScore,x.engine?.reproScore??x.reproScore,x.engine?.efficiencyScore??x.efficiencyScore,x.engine?.transferScore??x.transferScore,x.engine?.ordinaryAbility??x.ordinaryAbility,x.engine?.ordinaryMedian??x.ordinaryMedian,x.engine?.lowerStability??x.lowerStability,x.engine?.timingScore??x.timingScore,x.engine?.personalScore??x.personalScore,x.forehandAvg,x.backhandAvg,x.focus].map(escCsv).join(","));
+  if(!rows.length)return alert("書き出す履歴がありません。");
+  const csv="\ufeff"+[head.map(escCsv).join(","),...body].join("\n");
+  try{
+    await exportCsvSafe(csv,`table-tennis-history-${safeFileName(p.name)}.csv`);
+  }catch(e){
+    console.error(e);
+    alert("CSVの書き出しに失敗しました。");
+  }
+};
+printCarteBtn.onclick=()=>printCarte(openedCarte);
+exportCarteBtn.onclick=()=>{if(openedCarte)window.exportSingleCarte(openedCarte.id)};
+shareCurrentBtn.onclick=()=>shareAnalysisText(lastAnalysisSummary);
+shareCarteBtn.onclick=()=>shareAnalysisText(openedCarte);
+copyCarteBtn.onclick=()=>copyAnalysisText(openedCarte);
+closeCarteBtn.onclick=()=>{openedCarte=null;savedCarteCard.classList.add("hidden");savedCarteView.innerHTML=""};
+releaseMemoryBtn.onclick=async()=>{
+  await releaseTransientAnalysisMemory();
+  status.textContent="前回解析の候補画像・一時データを解放しました。保存済みの履歴は削除されていません。";
+};
+
+reloadHistoryBtn.onclick=()=>{
+  try{
+    renderHistoryUI();
+    status.textContent="履歴表示を再読み込みしました。";
+  }catch(e){
+    console.error(e);
+    status.textContent="履歴表示の読み込みに失敗しました。ただしAI分析は使用できます。";
+  }
+};
+
+clearPlayerHistoryBtn.onclick=()=>{
+  const p=activePlayer();
+  if(!confirm(`${p.name} の保存履歴をすべて削除しますか？\nこの操作は元に戻せません。`))return;
+  saveHistoryStore(loadHistory().filter(x=>(x.playerId||UNCLASSIFIED_PLAYER_ID)!==p.id));
+  openedCarte=null;savedCarteCard.classList.add("hidden");savedCarteView.innerHTML="";renderHistoryUI();
+};
+clearAllHistoryBtn.onclick=()=>{
+  const all=loadHistory();
+  if(!all.length){alert("削除する履歴はありません。");return;}
+  if(!confirm(`全選手の保存履歴 ${all.length} 件をすべて削除しますか？\nこの操作は元に戻せません。`))return;
+  if(!confirm("最終確認です。本当に全選手の履歴を削除しますか？"))return;
+  saveHistoryStore([]);
+  openedCarte=null;savedCarteCard.classList.add("hidden");savedCarteView.innerHTML="";renderHistoryUI();
+};
+window.addEventListener("resize",()=>{clearTimeout(window.__growthTimer);window.__growthTimer=setTimeout(drawTrendChart,150)});
+renderHistoryUI();
+
+async function liveLoop(){
+  if(!live||video.paused||video.ended)return;
+  overlay.width=video.videoWidth;overlay.height=video.videoHeight;ctx.clearRect(0,0,overlay.width,overlay.height);
+  try{const r=pose.detectForVideo(video,nextMpTimestamp(33));const lm=r.landmarks?.[0];if(lm)drawPose(lm);}catch(e){console.warn("Live pose error",e)}
+  raf=requestAnimationFrame(liveLoop);
+}
+liveBtn.onclick=()=>{
+  live=!live;liveBtn.textContent=live?"骨格表示 OFF":"骨格表示 ON";
+  if(live){video.play();liveLoop()}else{if(raf)cancelAnimationFrame(raf);ctx.clearRect(0,0,overlay.width,overlay.height)}
+};
+video.addEventListener("play",()=>{if(live)liveLoop()});
+video.addEventListener("pause",()=>{if(raf)cancelAnimationFrame(raf)});
+window.addEventListener("pagehide",()=>{live=false;if(raf)cancelAnimationFrame(raf);if(videoURL){URL.revokeObjectURL(videoURL);videoURL=null}});
+$("appBootState").textContent="基本機能：起動済み";
+</script>
+</body></html>
