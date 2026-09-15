@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>卓球フォーム総合AI分析 v3.9.32 Mobile Classic Boot</title>
+<title>卓球フォーム総合AI分析 v3.9.33 Personal Advice</title>
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--ink:#152033;--muted:#667085;--line:#dbe3ef;--accent:#2563eb;--accent2:#0f766e;--bad:#b42318;--good:#067647}
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",sans-serif}
@@ -133,11 +133,11 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 </head>
 <body>
 <header><div class="wrap">
-<h1>🏓 卓球フォーム総合AI分析 v3.9.32 Mobile Classic Boot</h1>
+<h1>🏓 卓球フォーム総合AI分析 v3.9.33 Personal Advice</h1>
 <p>MediaPipe Poseで骨格33点を検出し、関節角度・体幹・手首速度・リカバリーを数値化します。</p>
 </div></header>
 
-<main><div class="result-box" style="margin-bottom:12px"><strong>スマホ起動修正版 v3.9.32</strong>：基本画面を通常JavaScriptで起動し、iPhoneで名前登録などが停止する問題を回避しました。AI部品は「AIを準備」を押した時にだけ読み込みます。<span id="appBootState" class="fast-note">起動確認中…</span></div>
+<main><div class="result-box" style="margin-bottom:12px"><strong>個別アドバイス版 v3.9.33</strong>：本人の強弱、球間のばらつき、動作特性、フォア／バック差、前回との差から、根拠の異なる助言を作成します。点数は人物別補正をしません。<span id="appBootState" class="fast-note">起動確認中…</span></div>
 <section class="card">
   <div class="player-bar">
     <div>
@@ -346,7 +346,7 @@ const playerSelect=$("playerSelect"), addPlayerBtn=$("addPlayerBtn"), editPlayer
 const playerModal=$("playerModal"), playerModalTitle=$("playerModalTitle"), playerNameInput=$("playerNameInput"), playerHandInput=$("playerHandInput");
 const cancelPlayerBtn=$("cancelPlayerBtn"), savePlayerBtn=$("savePlayerBtn"), playerConditionInput=$("playerConditionInput");
 const HISTORY_KEY="tt_ai_analysis_history_v36";
-const CARTE_SCHEMA="v3.9.32 Mobile Classic Boot";
+const CARTE_SCHEMA="v3.9.33 Personal Advice";
 const OLD_HISTORY_KEY="tt_ai_analysis_history_v35";
 const PLAYERS_KEY="tt_ai_players_v36";
 const ACTIVE_PLAYER_KEY="tt_ai_active_player_v36";
@@ -403,6 +403,7 @@ function releaseTransientAnalysisMemory(){
   window.__lastDynamics=null;
   window.__legacyEvaluation=null;
   window.__lastEngine=null;
+  window.__lastCoaching=null;
 
   // Clear large canvases used only for the previous run.
   try{
@@ -442,6 +443,7 @@ function resetAnalysisSession({clearVideo=true,clearFile=true,statusMessage=""}=
   shots=[];
   window.__lastShotScores=[];
   window.__lastEngine=null;
+  window.__lastCoaching=null;
   window.__legacyEvaluation=null;
   window.__lastCareerLevel=null;
   if($("careerLevelScore"))$("careerLevelScore").textContent="--";
@@ -571,6 +573,13 @@ function historyWeakest(entry){
   const arr=[["構え",entry.ready],["下半身",entry.lower],["腕",entry.arm],["体幹",entry.torso],["リズム",entry.rhythm],["戻り",entry.recovery]].filter(x=>Number.isFinite(x[1])).sort((a,b)=>a[1]-b[1]);
   return arr.length?arr[0][0]:"—";
 }
+function evidenceFocus(entry){
+  const candidates=[
+    ["再現性",entry.reproScore],["動作効率",entry.efficiencyScore],["連鎖伝達",entry.transferScore],
+    ["通常球能力",entry.ordinaryAbility],["加速タイミング",entry.timingScore],["個人内安定",entry.personalScore]
+  ].filter(x=>Number.isFinite(x[1])).sort((a,b)=>a[1]-b[1]);
+  return candidates.length?candidates[0][0]:historyWeakest(entry);
+}
 function buildHistoryEntry(e,shotScores){
   const fh=shotScores.filter(s=>s.strokeKey==="forehand"),bh=shotScores.filter(s=>s.strokeKey==="backhand");
   const avg=a=>a.length?Math.round(mean(a.map(x=>x.total))):null,p=activePlayer();
@@ -604,7 +613,11 @@ function buildHistoryEntry(e,shotScores){
       out.careerLevelProvisional=cl.provisional;
     }
   }
-  out.focus=historyWeakest(out);return out;
+  if(window.__lastCoaching){
+    const c=window.__lastCoaching;
+    out.personalAdvice={styleLabel:c.styleLabel,meaning:c.meaning,observation:c.observation,drill:c.drill,previousText:c.previousText,strongest:c.strongest?.label||"",weakest:c.weakest?.label||""};
+  }
+  out.focus=evidenceFocus(out);return out;
 }
 
 function safeNum(v){return Number.isFinite(Number(v))?Number(v):null}
@@ -729,6 +742,8 @@ function analysisText(x){
     `バック平均：${x.backhandAvg??"—"}`,
     `重点課題：${x.focus||"—"}`
   ];
+  const pa=x.personalAdvice||window.__lastCoaching;
+  if(pa)lines.push("",`個別タイプ：${pa.styleLabel||"—"}`,`個別所見：${pa.meaning||"—"}`,`観察：${pa.observation||"—"}`,`次回の練習：${pa.drill||"—"}`,pa.previousText||"");
   const summary=x.summaryText||$("summary")?.textContent||"";
   if(summary)lines.push("",`概要：${summary.replace(/\s+/g," ").trim()}`);
   lines.push("","※映像から推定したフォーム評価です。ラケット面・回転量・正確な打球瞬間は直接測定していません。");
@@ -2409,21 +2424,45 @@ function coachingByEvidence(engine){
   const all=engine.fh.concat(engine.bh);
   const variance=metricVarianceEvidence(all);
   const unstable=variance[0], second=variance[1];
-  const strongest=[...variance].sort((a,b)=>b.avg-a.avg)[0];
+  const shotAverages=[
+    ["手首加速","speedScore"],["腕","elbowScore"],["下半身","kneeScore"],["体幹","torsoScore"],["戻り","recoveryScore"]
+  ].map(([label,key])=>({label,key,avg:all.length?Math.round(mean(all.map(s=>s[key]).filter(Number.isFinite))):NaN}))
+   .filter(x=>Number.isFinite(x.avg)).sort((a,b)=>b.avg-a.avg);
+  const strongest=shotAverages[0]||null;
+  const weakest=shotAverages[shotAverages.length-1]||null;
+
+  const coreMetrics=[
+    ["技術水準","techScore",engine.techScore],["再現性","reproScore",engine.reproScore],
+    ["動作効率","efficiencyScore",engine.efficiencyScore],["連鎖伝達効率","transferScore",engine.transferScore],
+    ["通常球能力","ordinaryAbility",engine.ordinaryAbility],["加速タイミング","timingScore",engine.timingScore],
+    ["個人内安定","personalScore",engine.personalScore]
+  ].filter(x=>Number.isFinite(x[2])).sort((a,b)=>b[2]-a[2]);
+  const coreStrong=coreMetrics[0]||null,coreWeak=coreMetrics[coreMetrics.length-1]||null;
+  const coreGap=coreStrong&&coreWeak?coreStrong[2]-coreWeak[2]:0;
 
   const timingOffsets=engine.timings.map(x=>x.offset).filter(Number.isFinite);
   const timingMean=timingOffsets.length?mean(timingOffsets):NaN;
   const timingSd=timingOffsets.length?stddev(timingOffsets):NaN;
 
-  let observation="";
-  if(unstable){
-    observation=`${unstable.label}は ${unstable.min}〜${unstable.max}点（SD ${unstable.sd.toFixed(1)}）と球ごとの差が最も大きく、${second?second.label+"もばらつきがあります。":""}`;
+  const observationParts=[];
+  if(strongest&&weakest)observationParts.push(`1球評価では「${strongest.label}」平均${strongest.avg}点が相対的な強みで、「${weakest.label}」平均${weakest.avg}点との差は${strongest.avg-weakest.avg}点です。`);
+  if(unstable)observationParts.push(`球ごとの変動は「${unstable.label}」が最大で、${unstable.min}〜${unstable.max}点（SD ${unstable.sd.toFixed(1)}）でした。`);
+  const fhAvg=engine.fh.length?mean(engine.fh.map(s=>s.total)):NaN,bhAvg=engine.bh.length?mean(engine.bh.map(s=>s.total)):NaN;
+  let strokeContrast="";
+  if(engine.fh.length>=2&&engine.bh.length>=2&&Number.isFinite(fhAvg)&&Number.isFinite(bhAvg)){
+    const diff=Math.round(Math.abs(fhAvg-bhAvg));
+    strokeContrast=diff<=3?`フォア平均${Math.round(fhAvg)}点、バック平均${Math.round(bhAvg)}点で、今回は左右差が小さい構成です。`:(fhAvg>bhAvg?`フォア平均${Math.round(fhAvg)}点がバック平均${Math.round(bhAvg)}点を${diff}点上回りました。今回はバック側を優先すると全体の底上げにつながります。`:`バック平均${Math.round(bhAvg)}点がフォア平均${Math.round(fhAvg)}点を${diff}点上回りました。今回はフォア側を優先すると全体の底上げにつながります。`);
+    observationParts.push(strokeContrast);
   }
-  let meaning="";
-  if(engine.reproScore<75) meaning="良い球を出す能力はありますが、同じ動作を続けて再現することが現在の主課題です。";
-  else if(engine.efficiencyScore<78) meaning="フォームは比較的そろっていますが、動作量に対して有効な加速へ変換できていない球があります。";
-  else if(engine.timingScore<78) meaning="速度そのものより、加速するタイミングを打球直前へそろえることが課題です。";
-  else meaning="フォームの再現性と加速の質は比較的高く、細かな弱点を絞って改善する段階です。";
+  const observation=observationParts.join(" ");
+
+  let styleLabel="バランス型",meaning="各主要指標の差が小さく、特定の一項目より全体を少しずつ整える状態です。";
+  const dyn=engine.dynamics||{};
+  if(engine.reproScore+7<engine.techScore){styleLabel="上限先行型";meaning="良い動作を出す力に対して再現性が低めです。新しい力を足すより、最良球の動きを通常球へそろえることが優先です。";}
+  else if(engine.techScore+7<engine.reproScore){styleLabel="安定先行型";meaning="動作は比較的そろっています。安定性を保ったまま、実測出力と加速の立ち上がりを一段上げる段階です。";}
+  else if(Number.isFinite(engine.transferScore)&&engine.transferScore+7<engine.efficiencyScore){styleLabel="伝達改善型";meaning="動作効率に比べて連鎖伝達が低めです。下半身・体幹側の動きと手首加速の順序をそろえることが優先です。";}
+  else if(Number.isFinite(dyn.speedScore)&&Number.isFinite(dyn.readyScore)&&dyn.speedScore-dyn.readyScore>=9){styleLabel="攻撃後準備型";meaning="加速の強さに対して次球準備が低めです。打球の威力を落とさず、振った直後の戻りを短くすることが課題です。";}
+  else if(coreGap>=10&&coreStrong&&coreWeak){styleLabel="強弱明確型";meaning=`「${coreStrong[0]}」を生かしながら、相対的に低い「${coreWeak[0]}」へ練習を集中すると変化を確認しやすい状態です。`;}
 
   const condition=engine.profile?.condition||"standard";
   let conditionText="";
@@ -2431,18 +2470,34 @@ function coachingByEvidence(engine){
   if(condition==="back_pain") conditionText="腰の負担を増やす大きな体幹回旋は求めず、無理のない前傾と腕・ラケットの戻りを優先します。";
   if(condition==="mobility_back") conditionText="左右移動と腰への負担を増やさず、上半身の準備・打点・ラケットの戻りを中心に評価します。";
 
-  let drill="";
-  if(unstable?.key==="recoveryScore") drill="1球ごとに打球後のラケットを胸の前へ戻すことだけを意識し、10〜20球。";
-  else if(unstable?.key==="torsoScore") drill="最良球を再生し、頭と体幹の位置を確認してから、同じ前傾を保つ影打ち10回×2セット。";
-  else if(unstable?.key==="kneeScore") drill="良い球の膝の使い方を確認し、無理のない範囲で同じ高さから打ち始める10〜20球。";
-  else if(unstable?.key==="elbowScore") drill="肘の開始位置を毎球そろえ、前腕の動きだけを比較する10〜20球。";
-  else drill="速く振ることより、打球直前に加速ピークが来る感覚を意識して10〜20球。";
+  const priorityKey=weakest?.key||unstable?.key||"speedScore";
+  const drills={
+    recoveryScore:"1球ごとに打球後のラケットを胸の前へ戻すことだけを意識し、10〜20球。",
+    torsoScore:"最良球を再生し、頭と体幹の位置を確認してから、同じ前傾を保つ影打ち10回×2セット。",
+    kneeScore:"良い球の膝の使い方を確認し、無理のない範囲で同じ高さから打ち始める10〜20球。",
+    elbowScore:"肘の開始位置を毎球そろえ、前腕の動きだけを比較する10〜20球。",
+    speedScore:"速く振り始めず、打球直前に加速ピークを作る意識で10〜20球。"
+  };
+  let drill=drills[priorityKey]||drills.speedScore;
+  if(engine.fh.length>=2&&engine.bh.length>=2&&Math.abs(fhAvg-bhAvg)>5)drill+=(fhAvg<bhAvg?" フォア":" バック")+"を多めにして、左右差が縮まるか確認します。";
 
   const personal = engine.bestDelta>4
     ? `最良球は本人平均より +${engine.bestDelta.toFixed(1)}点です。能力不足ではなく、良い動作を通常球へ再現する余地があります。`
     : `最良球と本人平均との差は小さく、全体の底上げより細かな質の改善が中心です。`;
 
-  return {observation,meaning,conditionText,drill,personal,timingMean,timingSd,strongest,unstable};
+  let previousText="保存済みの前回記録がないため、今回は動画内の個人差を中心に助言しています。";
+  const previous=historyForPlayer().slice(-1)[0];
+  if(previous){
+    const comparisons=[
+      ["動画評価",engine.overall,previous.overall],["再現性",engine.reproScore,previous.engine?.reproScore??previous.reproScore],
+      ["動作効率",engine.efficiencyScore,previous.engine?.efficiencyScore??previous.efficiencyScore],
+      ["連鎖伝達",engine.transferScore,previous.engine?.transferScore??previous.transferScore],
+      ["通常球能力",engine.ordinaryAbility,previous.engine?.ordinaryAbility??previous.ordinaryAbility]
+    ].filter(x=>Number.isFinite(x[1])&&Number.isFinite(x[2])).map(x=>({...{label:x[0],now:x[1],prev:x[2]},delta:Math.round((x[1]-x[2])*10)/10})).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
+    if(comparisons.length){const p=comparisons[0];previousText=`前回との差が最も大きいのは「${p.label}」で ${p.delta>0?"+":""}${p.delta}点です。撮影条件や練習内容の影響もあるため、これだけで上達・低下とは断定しません。`;}
+  }
+
+  return {observation,meaning,conditionText,drill,personal,timingMean,timingSd,strongest,weakest,unstable,second,styleLabel,strokeContrast,previousText,coreStrong,coreWeak,coreGap};
 }
 
 function competitiveGrade(score){
@@ -2543,7 +2598,8 @@ function renderEngineAdviceCard(e,c){
     mobility_back:"移動制限＋腰への負担を考慮"
   };
   const strengths=[];
-  if(strongest) strengths.push(`【${strongest.label}】平均 ${strongest.avg}点で、今回の動画で最も安定した強みです。`);
+  if(strongest) strengths.push(`【${strongest.label}】1球評価の平均 ${strongest.avg}点で、本人の他項目と比べた相対的な強みです。`);
+  if(c.coreStrong) strengths.push(`【${c.coreStrong[0]}】${c.coreStrong[2]}点で、主要評価の中で最も高い項目です。`);
   if(e.timingScore>=82) strengths.push(`【加速タイミング】${e.timingScore}点。打球候補付近での加速のタイミングは比較的良好です。`);
   if(e.reproScore>=82) strengths.push(`【再現性】${e.reproScore}点。同じ動画内でフォームを繰り返す安定性があります。`);
   if(!strengths.length) strengths.push("今回は突出した高得点よりも、改善点を絞ってフォーム全体を整える段階です。");
@@ -2556,13 +2612,17 @@ function renderEngineAdviceCard(e,c){
     <p><strong>今回の動画フォーム評価：${e.overall}点（${competitiveGrade(e.overall)}）</strong></p>
     <p>これは今回の動画のフォーム品質です。競技力そのものは、下の「蓄積型競技レベル」で複数回の履歴から別に評価します。</p>
 
+    <h3>今回の個別タイプ：${c.styleLabel}</h3>
+    <p>${c.meaning}</p>
+
     <h3>良い点</h3>
     <ul>${strengths.map(x=>`<li>${x}</li>`).join("")}</ul>
 
     <h3>改善ポイント</h3>
     <ul>
       <li>${c.observation||"球ごとのばらつきを確認します。"}</li>
-      <li>${c.meaning}</li>
+      <li>${c.weakest?`本人の1球評価で相対的に低いのは「${c.weakest.label}」平均${c.weakest.avg}点です。絶対的な欠点ではなく、今回もっとも改善効果を確認しやすい項目です。`:"候補球が少ないため、弱点の順位は参考値です。"}</li>
+      <li>${c.previousText}</li>
     </ul>
 
     <h3>数値の根拠</h3>
@@ -2575,7 +2635,7 @@ function renderEngineAdviceCard(e,c){
     <h3>次回の練習メニュー</h3>
     <ol>
       <li>${c.drill}</li>
-      <li>${unstable?`${unstable.label}のばらつき（現在SD ${unstable.sd.toFixed(1)}）を小さくできるか確認してください。`:"同じフォームを10〜20球繰り返して再現性を確認してください。"}</li>
+      <li>${unstable?`「${unstable.label}」のばらつき（現在SD ${unstable.sd.toFixed(1)}）を小さくできるか確認してください。最良値を上げることより、低い球を減らすことを目標にします。`:"同じフォームを10〜20球繰り返して再現性を確認してください。"}</li>
     </ol>
 
     <h3>身体条件への配慮</h3>
@@ -2590,6 +2650,7 @@ function renderEngineEvaluation(shotScores){
   const e=evaluateEngine(shotScores);
   if(!e)return;
   const c=coachingByEvidence(e);
+  window.__lastCoaching=c;
   const metric=(name,value,why)=>`<div class="engine-metric"><span>${name}</span><strong>${value}</strong><small>/100</small><div class="why">${why}</div></div>`;
   $("engineScores").innerHTML=
     metric("技術水準",e.techScore,"実測出力・加速・運動連鎖を中心に評価")+
@@ -2621,13 +2682,14 @@ function renderEngineEvaluation(shotScores){
         候補品質は中央値 ${e.selection?.qualityMedian??"—"}点、${e.selection?.selected.length??0}/${e.selection?.count??0}球を通常球評価に採用。<br>
         ${Number.isFinite(c.timingMean)?`加速ピーク平均 ${c.timingMean>=0?"+":""}${c.timingMean.toFixed(2)}秒、ばらつき ${c.timingSd.toFixed(2)}秒。`:"加速タイミングは暫定評価。"}
       </div>
-      <div class="evidence-item"><strong>③ 意味</strong><br>${c.meaning}<br>${c.personal}</div>
+      <div class="evidence-item"><strong>③ 意味・個別タイプ</strong><br><strong>${c.styleLabel}</strong><br>${c.meaning}<br>${c.personal}</div>
       <div class="evidence-item"><strong>④ 次の練習</strong><br>${c.drill}</div>
     </div>
     <div class="reference-note"><strong>⑤ 次回確認：</strong>
       ${c.unstable?`${c.unstable.label}のSDを ${c.unstable.sd.toFixed(1)} より小さくできるか確認します。`:"同じフォームの再現性を確認します。"}
       ${c.strongest?` 強みは ${c.strongest.label}（平均${c.strongest.avg}点）です。`:""}
     </div>
+    <div class="reference-note"><strong>⑥ 前回との比較：</strong>${c.previousText}</div>
     <div class="profile-condition"><strong>身体条件：</strong>${condName}。${c.conditionText||"特別な補正は行っていません。"}</div>
   `;
   $("engineCard").classList.remove("hidden");
