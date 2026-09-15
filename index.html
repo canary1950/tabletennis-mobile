@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>卓球フォーム総合AI分析 v3.9.33 Personal Advice</title>
+<title>卓球フォーム総合AI分析 v3.9.35 Stroke Classifier</title>
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--ink:#152033;--muted:#667085;--line:#dbe3ef;--accent:#2563eb;--accent2:#0f766e;--bad:#b42318;--good:#067647}
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",sans-serif}
@@ -133,11 +133,11 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 </head>
 <body>
 <header><div class="wrap">
-<h1>🏓 卓球フォーム総合AI分析 v3.9.33 Personal Advice</h1>
+<h1>🏓 卓球フォーム総合AI分析 v3.9.35 Stroke Classifier</h1>
 <p>MediaPipe Poseで骨格33点を検出し、関節角度・体幹・手首速度・リカバリーを数値化します。</p>
 </div></header>
 
-<main><div class="result-box" style="margin-bottom:12px"><strong>個別アドバイス版 v3.9.33</strong>：本人の強弱、球間のばらつき、動作特性、フォア／バック差、前回との差から、根拠の異なる助言を作成します。点数は人物別補正をしません。<span id="appBootState" class="fast-note">起動確認中…</span></div>
+<main><div class="result-box" style="margin-bottom:12px"><strong>球種判定改善版 v3.9.35</strong>：バックハンドモードの確実な集計、総合モードの中央軌道判定、最大12球の候補分析に対応しました。個別アドバイスとスマホ軽量化も維持しています。<span id="appBootState" class="fast-note">起動確認中…</span></div>
 <section class="card">
   <div class="player-bar">
     <div>
@@ -346,7 +346,7 @@ const playerSelect=$("playerSelect"), addPlayerBtn=$("addPlayerBtn"), editPlayer
 const playerModal=$("playerModal"), playerModalTitle=$("playerModalTitle"), playerNameInput=$("playerNameInput"), playerHandInput=$("playerHandInput");
 const cancelPlayerBtn=$("cancelPlayerBtn"), savePlayerBtn=$("savePlayerBtn"), playerConditionInput=$("playerConditionInput");
 const HISTORY_KEY="tt_ai_analysis_history_v36";
-const CARTE_SCHEMA="v3.9.33 Personal Advice";
+const CARTE_SCHEMA="v3.9.35 Stroke Classifier";
 const OLD_HISTORY_KEY="tt_ai_analysis_history_v35";
 const PLAYERS_KEY="tt_ai_players_v36";
 const ACTIVE_PLAYER_KEY="tt_ai_active_player_v36";
@@ -1060,7 +1060,7 @@ function findPeaks(data, limit=5, thresholdP=.78, minGap=.55){
 }
 
 
-function detectStrokeCandidates(data, limit=8){
+function detectStrokeCandidates(data, limit=12){
   if(data.length<5)return [];
 
   // Build several independent motion cues so compact backhands are not
@@ -1095,7 +1095,7 @@ function detectStrokeCandidates(data, limit=8){
     const e=energy[i];
     if(e>=threshold && e>=energy[i-1] && e>energy[i+1]){
       const candidate={...data[i],motionEnergy:e};
-      if(!peaks.length || candidate.t-peaks[peaks.length-1].t>.42){
+      if(!peaks.length || candidate.t-peaks[peaks.length-1].t>.30){
         peaks.push(candidate);
       }else if(e>peaks[peaks.length-1].motionEnergy){
         peaks[peaks.length-1]=candidate;
@@ -1161,6 +1161,12 @@ function bodySideCoord(lm, pointIdx){
 function classifyStroke(peak, data){
   if(!peak?.lm)return {type:'不明',key:'unknown',confidence:0,reason:'骨格不足'};
 
+  // An explicitly selected single-stroke mode is stronger evidence than a
+  // camera-angle-sensitive trajectory heuristic.
+  const selectedMode=$('mode').value;
+  if(selectedMode==='backhand')return {type:'バック',key:'backhand',confidence:99,reason:'バックハンドモード指定'};
+  if(selectedMode==='forehand')return {type:'フォア',key:'forehand',confidence:99,reason:'フォアハンドモード指定'};
+
   const rightHand=$('hand').value==='right';
   const wristIdx=rightHand?16:15;
   const elbowIdx=rightHand?14:13;
@@ -1180,7 +1186,7 @@ function classifyStroke(peak, data){
   const es=elbowSides.map(v=>v*sign);
 
   const peakSide=(bodySideCoord(peak.lm,wristIdx)||0)*sign;
-  const meanSide=mean(ws);
+  const meanSide=medianNum(ws);
   const minSide=Math.min(...ws), maxSide=Math.max(...ws);
   const sideRange=maxSide-minSide;
 
@@ -1191,8 +1197,10 @@ function classifyStroke(peak, data){
   const postSide=post.length?mean(post.map(d=>bodySideCoord(d.lm,wristIdx)*sign).filter(Number.isFinite)):meanSide;
   const outwardMove=postSide-preSide; // + = moving toward hitting-hand side
 
-  const elbowMean=es.length?mean(es):0;
+  const elbowMean=es.length?medianNum(es):0;
   const wristElbowGap=meanSide-elbowMean;
+  const elbowAngles=samples.map(d=>d.elbow).filter(Number.isFinite);
+  const elbowMedian=elbowAngles.length?medianNum(elbowAngles):NaN;
 
   /*
     Heuristic for table tennis:
@@ -1204,39 +1212,49 @@ function classifyStroke(peak, data){
   let foreScore=0, backScore=0;
 
   // Position at/around impact
-  if(peakSide>1.10) foreScore+=4;
-  else if(peakSide>0.82) foreScore+=2;
-  else if(peakSide<0.62) backScore+=4;
-  else backScore+=2;
+  if(peakSide>1.28) foreScore+=4;
+  else if(peakSide>1.08) foreScore+=2;
+  else if(peakSide<0.72) backScore+=4;
+  else if(peakSide<1.02) backScore+=3;
 
   // Mean position through the swing
-  if(meanSide>1.00) foreScore+=3;
-  else if(meanSide<0.68) backScore+=4;
-  else if(meanSide<0.86) backScore+=2;
+  if(meanSide>1.18) foreScore+=3;
+  else if(meanSide<0.72) backScore+=4;
+  else if(meanSide<1.00) backScore+=3;
 
   // Crossing / central preparation is a strong backhand cue
-  if(minSide<0.20) backScore+=4;
-  else if(minSide<0.58) backScore+=3;
+  if(minSide<0.25) backScore+=5;
+  else if(minSide<0.68) backScore+=4;
+  else if(minSide<0.88) backScore+=2;
 
   // Very outside trajectory is a forehand cue
-  if(maxSide>1.35) foreScore+=3;
-  else if(maxSide>1.05) foreScore+=1;
+  if(maxSide>1.48 && minSide>0.62) foreScore+=4;
+  else if(maxSide>1.22 && meanSide>1.02) foreScore+=2;
 
   // Backhand often moves from center toward hitting side near impact
-  if(preSide<0.72 && outwardMove>0.04) backScore+=4;
-  if(preSide>0.85 && sideRange>0.25) foreScore+=2;
+  if(preSide<0.90 && outwardMove>0.03) backScore+=5;
+  if(preSide<0.72 && peakSide<1.12) backScore+=3;
+  if(preSide>1.02 && sideRange>0.30 && meanSide>1.05) foreScore+=2;
 
   // Elbow/wrist geometry
-  if(elbowMean<0.62 && meanSide<0.82) backScore+=3;
-  if(meanSide<0.78 && sideRange<0.85) backScore+=2;
-  if(preSide<0.70 && peakSide<0.85) backScore+=2;
-  if(wristElbowGap>0.55 && meanSide>0.85) foreScore+=1;
+  if(elbowMean<0.82 && meanSide<1.02) backScore+=4;
+  if(wristElbowGap<0.42 && meanSide<1.05) backScore+=3;
+  if(Number.isFinite(elbowMedian) && elbowMedian<118 && meanSide<1.08) backScore+=2;
+  if(meanSide<0.92 && sideRange<0.95) backScore+=2;
+  if(wristElbowGap>0.62 && meanSide>1.10) foreScore+=2;
+
+  // Borderline central strokes are more often compact backhands. Require
+  // genuinely outside preparation before assigning a borderline forehand.
+  if(Math.abs(foreScore-backScore)<=2){
+    if(meanSide<1.02 || preSide<0.88)backScore+=2;
+    else if(meanSide>1.18 && minSide>0.70)foreScore+=2;
+  }
 
   const total=foreScore+backScore || 1;
   const diff=Math.abs(foreScore-backScore);
   const confidence=Math.round(clamp(55 + diff/total*40,55,95));
 
-  if(backScore>foreScore){
+  if(backScore>=foreScore){
     return {
       type:'バック推定',key:'backhand',confidence,
       reason:`中心寄りの手首軌道（中心度 ${meanSide.toFixed(2)}）`
@@ -3047,8 +3065,8 @@ analyzeBtn.onclick=async()=>{
     if(analysisData.length<4)throw new Error('人物の骨格を十分に検出できませんでした。上半身（肩・肘・手首・腰）が見える動画を使ってください。');
     const partialLowerCount=analysisData.filter(d=>d.lowerBodyVisible).length;
 
-    let coarsePeaks=detectStrokeCandidates(analysisData,10);
-    if(!coarsePeaks.length) coarsePeaks=findPeaks(analysisData,8,.55,.42);
+    let coarsePeaks=detectStrokeCandidates(analysisData,14);
+    if(!coarsePeaks.length) coarsePeaks=findPeaks(analysisData,12,.55,.30);
     const intervals=mergeIntervals(coarsePeaks,dur);
 
     status.textContent=`候補 ${coarsePeaks.length}か所を精密解析中…（${intervals.length}区間）`;
@@ -3072,8 +3090,8 @@ analyzeBtn.onclick=async()=>{
 
     shotAnalysisData=shotAnalysisData.sort((a,b)=>a.t-b.t).filter((d,i,a)=>i===0||d.t-a[i-1].t>.025);
     const fineBase=shotAnalysisData.length?shotAnalysisData:analysisData;
-    let peaks=detectStrokeCandidates(fineBase,8);
-    if(peaks.length<Math.min(4,coarsePeaks.length)) peaks=coarsePeaks.slice(0,8);
+    let peaks=detectStrokeCandidates(fineBase,12);
+    if(peaks.length<Math.min(6,coarsePeaks.length)) peaks=coarsePeaks.slice(0,12);
 
     ensureCurrent();
     const e=evaluate(analysisData,peaks); renderEvaluation(e);
